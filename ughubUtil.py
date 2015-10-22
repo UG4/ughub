@@ -1,5 +1,4 @@
 
-
 # Traverses a directory or list using the specified key.
 # key has to be a string. You may request a nested key by separating
 # nested keys with '.'
@@ -28,3 +27,4 @@ def GetFromDict(dictionary, key):
 		else:
 			raise LookupError()
 	return d
+

@@ -42,6 +42,13 @@ content = {
 						   "is created in which information on available and installed packages will\n"
 						   "be stored. It also creates a CMakeLists.txt file, which can later be used\n"
 						   "to build ug and all installed plugins.",
+			"options": [
+				{
+					"name": "-f [--force]",
+					"description":	"Forces initialization in the current directory, even if a parent\n"
+									"directory already contains a '.ughub' subdirectory."
+				}
+			]
 		},
 
 		{
@@ -50,8 +57,14 @@ content = {
 			"description":	"Installs the specified PACKAGE",
 			"options": [
 				{
+					"name": "-b [--branch] ARG",
+					"description":	"The branch ARG of the associated PACKAGE repository will be installed.\n"
+									"If not specified, the default branch of the package is used\n"
+									"(see 'setdefaultbranch')."
+				},
+				{
 					"name": "-s [--source] ARG",
-					"description":	"Installs the package from the source with name ARG."
+					"description":	"Installs the PACKAGE from the source with name ARG."
 				}
 			]
 		},
@@ -97,6 +110,12 @@ content = {
 			"name": "removesource",
 			"usage": "removesource NAME",
 			"description":	"Removes the source with the given NAME."
+		},
+
+		{
+			"name": "setdefaultbranch",
+			"usage": "setdefaultbranch BRANCH",
+			"description": 	"Sets BRANCH as the default branch used during 'install'"
 		},
 
 		{
