@@ -9,7 +9,7 @@ content = {
 			"name": "addsource",
 			"usage": "addsource NAME URL",
 			"description": "Adds a package-source (i.e. a git repository) from the given\n"
-						   "URL. The package may later be referenced by NAME in other commands.\n"
+						   "URL. The source may later be referenced by NAME in other commands.\n"
 						   "Valid repositories have to contain a 'package.json' file,\n"
 						   "and optionally 'build_scripts' and 'licenses' folders in their\n"
 						   "top-level directory. The specified URL has to be a valid git-url.",
@@ -65,8 +65,19 @@ content = {
 				{
 					"name": "-s [--source] ARG",
 					"description":	"Installs the PACKAGE from the source with name ARG."
+				},
+				{
+					"name": "-d [--dry]",
+					"description":	"Performs a dry run, i.e., prints all dependencies without\n"
+									"installing any files."
 				}
 			]
+		},
+
+		{
+			"name": "packageinfo",
+			"usage": "packageinfo NAME",
+			"description": "Lists detailed information of all available packages with the given NAME."
 		},
 
 		{
@@ -86,7 +97,7 @@ content = {
 				},
 
 				{
-					"name": "-n [--installed]",
+					"name": "-n [--notinstalled]",
 					"description":	"Only packages which are not installed are listed."
 				}
 			]
@@ -112,11 +123,11 @@ content = {
 			"description":	"Removes the source with the given NAME."
 		},
 
-		{
-			"name": "setdefaultbranch",
-			"usage": "setdefaultbranch BRANCH",
-			"description": 	"Sets BRANCH as the default branch used during 'install'"
-		},
+		# {
+		# 	"name": "setdefaultbranch",
+		# 	"usage": "setdefaultbranch BRANCH",
+		# 	"description": 	"Sets BRANCH as the default branch used during 'install'"
+		# },
 
 		{
 			"name": "sources",

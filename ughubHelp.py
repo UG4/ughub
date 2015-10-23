@@ -3,37 +3,38 @@
 import ughubUtil
 import ughubHelpContents
 
+class MalformedHelpContentsError(Exception) : pass
 
 def GetHelpEntry(entry):
-	return ughubUtil.GetFromDict(ughubHelpContents.content, entry)
+	return ughubUtil.GetFromNestedTable(ughubHelpContents.content, entry)
 
 
 def GetCommandsInHelp():
-	d = GetHelpEntry("commands")
-	out = []
+	try:
+		d = GetHelpEntry("commands")
+		out = []
 
-	if type(d) == list:
-		for e in d:
-			out.append(e["name"])
-	else:
-		raise LookupError()
+		if type(d) == list:
+			for e in d:
+				out.append(e["name"])
+		else:
+			raise MalformedHelpContentsError("'commands' entry has to be a list")
+	except ughubUtil.NestedTableEntryNotFoundError as e:
+		raise MalformedHelpContentsError("'commands' list required in help contents")
+
 	return out
 
 
 def PrintUsage():
 	try:
 		print(GetHelpEntry("usage"))
-	except LookupError:
-		print("ERROR: Requested help-key not found: usage")
+	except ughubUtil.NestedTableEntryNotFoundError as e:
+		raise MalformedHelpContentsError(e.message)
 
 
 def PrintCommands():
-	try:
-		for cmd in GetCommandsInHelp():
-			print("  {0}".format(cmd))
-	except LookupError:
-		print("ERROR: Requested command list not found in help database")
-
+	for cmd in GetCommandsInHelp():
+		print("  {0}".format(cmd))
 
 # Prints help for the command specified in 'cmd'.
 def PrintCommandHelp(cmdName):
@@ -45,7 +46,7 @@ def PrintCommandHelp(cmdName):
 			print("  {0}".format(line))
 
 		try:
-			options = ughubUtil.GetFromDict(cmdDict, "options")
+			options = ughubUtil.GetFromNestedTable(cmdDict, "options")
 			print("")
 			print("Valid options:")
 			for opt in options:
@@ -55,15 +56,16 @@ def PrintCommandHelp(cmdName):
 					print("  {0:20}{1} {2}").format(name, sep, line)
 					name = ""
 					sep = " "
-		except LookupError:
+		except ughubUtil.NestedTableEntryNotFoundError:
 			pass
 
-	except LookupError:
-		print("ERROR: Requested command '{0}' not found in help database"
-			  .format(cmdName))
+	except ughubUtil.NestedTableEntryNotFoundError:
+		raise MalformedHelpContentsError("Requested command '{0}' not found in help database"
+			  							 .format(cmdName))
 
 # Prints help on how to use the help command and a list of all available commands
 def PrintHelp():
 	PrintCommandHelp("help")
+	print("")
 	print("available commands:")
 	PrintCommands()
