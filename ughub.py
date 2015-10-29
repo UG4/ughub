@@ -2,7 +2,9 @@
 
 # copyright 2015 Sebastian Reiter (G-CSC Frankfurt)
 
-# standard library imports
+ughubVersionString = "1.0.0"
+
+import collections
 import json
 import os
 import re
@@ -16,6 +18,12 @@ class NoRootDirectoryError(Exception) : pass
 class InvalidSourceError(Exception) : pass
 class InvalidPackageError(Exception) : pass
 class DependencyError(Exception) : pass
+class TargetError(Exception) : pass
+class TransactionError(Exception): pass
+
+
+# Some named tuples that will be used below
+PackageBranchPair = collections.namedtuple("PackageBranchPair", "package branch")
 
 
 def GetRootDirectory():
@@ -100,18 +108,18 @@ def RefreshSources(args):
 			srcDir = os.path.join(sourcesDir, name)
 
 			if not os.path.isdir(srcDir):
-				print("Cloning source '{0}' from branch '{1}' at '{2}'".
+				print("Cloning source '{0}', branch '{1}' at '{2}'".
 					  format(name, branch, url))
 				proc = subprocess.Popen(["git", "clone", "--branch", branch, url, name], cwd = sourcesDir)
 				if proc.wait() != 0:
-					raise InvalidSourceError("Couldn't check out source '{0}' from branch '{1}' at '{2}'"
+					raise InvalidSourceError("Couldn't check out source '{0}' with branch '{1}' at '{2}'"
 											 .format(name, branch, url))
 			else:
-				print("Updating source '{0}' from branch '{1}' at '{2}'".
+				print("Updating source '{0}' (branch '{1}') at '{2}'".
 					  format(name, branch, url))
 				proc = subprocess.Popen(["git", "pull"], cwd = srcDir)
 				if proc.wait() != 0:
-					raise InvalidSourceError("Couldn't pull from branch '{0}' at '{1}' for source '{2}'"
+					raise InvalidSourceError("Couldn't pull from '{1}' (branch '{0}') for source '{2}'"
 											 .format(branch, url, name))
 
 	except LookupError as e:
@@ -141,6 +149,9 @@ def LoadPackageDescs():
 
 		except LookupError:
 			raise InvalidSourceError("couldn't find field 'name'")
+		except ValueError as e:
+			raise InvalidSourceError("couldn't parse file '{0}': {1}"
+									 .format(packagesFile, e.message))
 
 	return packagesOut
 
@@ -203,12 +214,28 @@ def ListPackages(args):
 		raise InvalidPackageError(e.message)
 
 
+def ShortPackageInfo(pkg):
+	s = "  {0:10}: '{1}'".format("name", pkg["name"])
+	if "__SOURCE" in pkg:
+		s = "\n".join((s, "  {0:10}: '{1}'".format("source", pkg["__SOURCE"])))
+	if "__BRANCH" in pkg:
+		s = "\n".join((s, "  {0:10}: '{1}'".format("branch", pkg["__BRANCH"])))
+	s = "\n".join((s, "  {0:10}: '{1}'".format("url", pkg["url"])))
+	s = "\n".join((s, "  {0:10}: '{1}'".format("target", GetPackageDir(pkg))))
+	return s
+
+
+def LongPackageInfo(pkg):
+	return ughubUtil.NestedTableToString(pkg)
+
+
 def PrintPackageInfo(args):
-	if len(args) != 1:
+	packageList = ughubUtil.RemoveOptions(args)
+	if len(packageList) != 1:
 		print("Please specify exactly one package name. See 'ughub help packageinfo'")
 		return
 
-	packageName	= args[0]
+	packageName	= packageList[0]
 	packages = LoadPackageDescs()
 
 	firstPackage = True
@@ -221,24 +248,18 @@ def PrintPackageInfo(args):
 
 				print("package '{0}' from source '{1}':"
 					  .format(packageName, pkg["__SOURCE"]))
-				print(ughubUtil.NestedTableToString(pkg))
+				if ughubUtil.HasCommandlineOption(args, ("-s", "--short")):
+					print(ShortPackageInfo(pkg))
+				else:
+					print(LongPackageInfo(pkg))
 
 		except LookupError:
 			raise InvalidSourceError("Failed to access package list in '{0}'"
 									 .format(packagesFile))
 
+
 def GetPackageDir(pkg):
 	return os.path.join(GetRootDirectory(), pkg["prefix"], pkg["name"])
-
-def ShortPackageInfo(pkg):
-	s = "  {0:10}: '{1}'".format("name", pkg["name"])
-	if "__SOURCE" in pkg:
-		s = "\n".join((s, "  {0:10}: '{1}'".format("source", pkg["__SOURCE"])))
-	if "__BRANCH" in pkg:
-		s = "\n".join((s, "  {0:10}: '{1}'".format("branch", pkg["__BRANCH"])))
-	s = "\n".join((s, "  {0:10}: '{1}'".format("url", pkg["url"])))
-	s = "\n".join((s, "  {0:10}: '{1}'".format("target", GetPackageDir(pkg))))
-	return s
 
 
 # returns a list of package descriptors that have to be installed for a given package.
@@ -253,17 +274,17 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 				useBranch = branch or pkg["defaultBranch"]
 
 				for processedPBP in processedPackageBranchPairs:
-					if processedPBP[0] == packageName:
-						if processedPBP[1] == useBranch:
+					if processedPBP.package == packageName:
+						if processedPBP.branch == useBranch:
 							return []
 						else:
 							raise DependencyError("Branch conflict: '{0}' required from branch '{1}' and branch '{2}'.\n"
 												  "Package list:"
-												  .format(packageName, useBranch, processedPBP[1]))
+												  .format(packageName, useBranch, processedPBP.branch))
 
 				pkg["__BRANCH"] = useBranch
 				packagesOut.append(pkg)
-				processedPackageBranchPairs.append((packageName, useBranch))
+				processedPackageBranchPairs.append(PackageBranchPair(packageName, useBranch))
 
 				if "dependencies" in pkg:
 					dependsOn = None
@@ -297,37 +318,121 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 
 
 
-
 def InstallPackage(args):
 	if len(args) == 0 or args[0][0] == "-":
 		print("Please specify a package name. See 'ughub help install'")
 		return
 
-	branch = ughubUtil.GetCommandlineOptionValue(args, ("-b", "--branch"))
-	source = ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
-	packageName = args[0]
-	packages = LoadPackageDescs()
-	requiredPackages = BuildPackageDependencyList(packageName, packages, source, branch)
-	rootDir = GetRootDirectory()
+	dryRun	= ughubUtil.HasCommandlineOption(args, ("-d", "--dry"))
+	force	= ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+	branch	= ughubUtil.GetCommandlineOptionValue(args, ("-b", "--branch"))
+	source	= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
+	packageName	= args[0]
+	packages	= LoadPackageDescs()
+	rootDir		= GetRootDirectory()
+	requiredPackages	= BuildPackageDependencyList(packageName, packages, source, branch)
 
-	print("The following packages will be installed/updated:")
+	print("List of required packages:")
+
+	# iterate over all required packages. Check for each whether it already
+	# exists and whether the branch matches.
+	# If it doesn't exist, perform a fresh clone.
+	# If it does exist and branches match, perform a pull.
+	# If it does exist but branches mismatch, perform a pull if --force was specified
+	# and abort with a warning if it wasn't specified.
+
 	firstPkg = True
+	problemsOccurred = False
 	for pkg in requiredPackages:
 		if not firstPkg:
 			print("")
 		firstPkg = False
-
 		print(ShortPackageInfo(pkg))
 
-	if ughubUtil.HasCommandlineOption(args, ("-d", "--dry")):
+	#	check whether the package is already installed
+		if pkg["repoType"] == "git":
+			prefixPath = os.path.join(rootDir, pkg["prefix"])
+			pkgPath = os.path.join(prefixPath, pkg["name"])
+			if os.path.isdir(os.path.join(pkgPath, ".git")):
+				p = subprocess.Popen("git branch --list".split(), cwd = pkgPath, stdout=subprocess.PIPE)
+				gitLog, _ = p.communicate()
+				curBranch = None
+				for line in gitLog.splitlines():
+					if line[0] == "*":
+						curBranch = line.split()[1]
+						break
+
+				if curBranch != pkg["__BRANCH"]:
+					if not dryRun:
+						if force:
+							proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
+							if proc.wait() != 0:
+								raise TransactionError("Couldn't check out branch '{0}' of package '{1}' at '{2}'"
+														.format(pkg["__BRANCH"], pkg["name"], pkgPath))
+							print("Forcefully resolved branch conflict by switching from branch '{0}'\n"
+								  "to branch '{1}' of package '{2}' at '{3}'"
+								  .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
+
+						else:
+							raise DependencyError(
+									"Current branch '{0}' and required branch '{1}'\n"
+									"  do not match for package '{2}' at '{3}'.\n"
+									"  Call 'ughub install' with the '--force' option to force a checkout of the required branch."
+									.format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
+					else:
+						if force:
+							print("NOTE: Branch '{0}' of package '{2}' at '{3}'\n"
+								  "      will be replaced by branch '{1}'"
+								   .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
+						else:
+							problemsOccurred = True
+							print("WARNING: Branch conflict of package '{2}' at '{3}' detected.\n"
+								  "         Use the --force option to replace branch '{0}' by branch '{1}'"
+								   .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
+
+
+				if not dryRun:
+					proc = subprocess.Popen(["git", "pull"], cwd = pkgPath)
+					if proc.wait() != 0:
+						raise TransactionError("Couldn't pull for package '{0}' at '{1}'"
+												.format(pkg["name"], pkgPath))
+
+			else:
+			#	the package doesn't exist yet. Make sure that all paths are set up correctly
+			#	and perform a clone
+				if os.path.exists(pkgPath):
+					try:
+						if not os.path.isdir(pkgPath):
+							raise TargetError("Target path '{0}' for package '{1}' exists but is not a directory"
+											   .format(pkgPath, pkg["name"]))
+						if os.listdir(pkgPath):
+							raise TargetError("Target path '{0}' for package '{1}' has to be empty or a valid git working copy."
+											  .format(pkgPath, pkg["name"]))
+					except TargetError as e:
+						if dryRun:
+							print("WARNING: {0}".format(e.message))
+							problemsOccurred = True
+						else:
+							raise e
+
+				if not dryRun:
+					if not os.path.exists(pkgPath):
+						os.makedirs(pkgPath)
+
+					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], pkg["url"], pkg["name"]], cwd = prefixPath)
+					if proc.wait() != 0:
+						raise TransactionError("Couldn't clone package '{0}' with branch '{1}' from '{2}'"
+												.format(pkg["name"], pkg["__BRANCH"], pkg["url"]))
+
+		else:
+			raise InvalidPackageError("Unsupported repository type of package '{0}': '{1}'"
+							   		  .format(pkg["name"], pkg["repoType"]))
+
+	if dryRun:
+		print("Dry run. Nothing was installed/updated.")
+		if problemsOccurred:
+			print("WARNING: problems were detected during dry installation run. See above.")
 		return
-
-
-
-	print("ERROR - NOT YET IMPLEMENTED")
-	# for arg in args:
-	# 	if arg in ("-b", "--branch"):
-
 
 
 def ParseArguments(args):
@@ -360,6 +465,9 @@ def ParseArguments(args):
 		elif cmd == "packages":
 			ListPackages(args[1:])
 
+		elif cmd in ("version", "--version"):
+			print("ughub, version {}".format(ughubVersionString))
+
 		else:
 			ughubHelp.PrintUsage()
 
@@ -369,17 +477,24 @@ def ParseArguments(args):
 				"calling 'ughub init'.")
 
 	except ughubHelp.MalformedHelpContentsError as e:
-		print("ERROR (malformed help contents) --- {0}".format(e.message))
+		print("ERROR (malformed help contents)\n  {0}".format(e.message))
 
 	except InvalidSourceError as e:
-		print("ERROR (invalid source) --- {0}".format(e.message))
+		print("ERROR (invalid source)\n  {0}".format(e.message))
 
 	except InvalidPackageError as e:
-		print("ERROR (invalid package) --- {0}".format(e.message))
+		print("ERROR (invalid package)\n  {0}".format(e.message))
 
 	except DependencyError as e:
-		print("ERROR (dependency error) --- {0}".format(e.message))
-		print("ERROR (dependency error) --- see above")
+		print("ERROR (dependency error)\n  {0}".format(e.message))
+		print("ERROR (dependency error) ---  see above")
+
+	except TargetError as e:
+		print("ERROR (target error)\n  {0}".format(e.message))
+
+	except TransactionError as e:
+		print("ERROR (transaction error)\n  {0}".format(e.message))
+
 	print("")
 
 ParseArguments(sys.argv[1:])

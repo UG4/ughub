@@ -7,7 +7,7 @@ content = {
 	"commands": [
 		{
 			"name": "addsource",
-			"usage": "addsource NAME URL",
+			"usage": "addsource NAME URL [OPTIONS]",
 			"description": "Adds a package-source (i.e. a git repository) from the given\n"
 						   "URL. The source may later be referenced by NAME in other commands.\n"
 						   "Valid repositories have to contain a 'package.json' file,\n"
@@ -37,7 +37,7 @@ content = {
 
 		{
 			"name": "init",
-			"usage": "init",
+			"usage": "init [OPTIONS]",
 			"description": "Initializes a path for use with ughub. To this end a .ughub folder,\n"
 						   "is created in which information on available and installed packages will\n"
 						   "be stored. It also creates a CMakeLists.txt file, which can later be used\n"
@@ -53,36 +53,51 @@ content = {
 
 		{
 			"name": "install",
-			"usage": "install PACKAGE",
-			"description":	"Installs the specified PACKAGE",
+			"usage": "install PACKAGE [OPTIONS]",
+			"description":	"Installs/updates the specified PACKAGE\n"
+							"Dependend packages will also be automatically installed/updated.\n"
+							"If an affected package exists already and if the requested branch\n"
+							"does not match the current branch of that package, an error is raised\n"
+							"unless the --force option is specified. The latter will automatically\n"
+							"perform a checkout of the newly requested branch.",
 			"options": [
 				{
 					"name": "-b [--branch] ARG",
-					"description":	"The branch ARG of the associated PACKAGE repository will be installed.\n"
-									"If not specified, the default branch of the package is used\n"
-									"(see 'setdefaultbranch')."
-				},
-				{
-					"name": "-s [--source] ARG",
-					"description":	"Installs the PACKAGE from the source with name ARG."
+					"description":	"The branch ARG of the associated PACKAGE repository will be installed/updated.\n"
+									"If not specified, the default branch of the package is used."
 				},
 				{
 					"name": "-d [--dry]",
 					"description":	"Performs a dry run, i.e., prints all dependencies without\n"
 									"installing any files."
-				}
+				},
+				{
+					"name": "-f [--force]",
+					"description":	"Ignores branch conflicts between a requested and a present branch\n"
+									"for existing packages by simply checking out the requested branch."
+				},
+				{
+					"name": "-s [--source] ARG",
+					"description":	"Installs the PACKAGE from the source with name ARG."
+				},
 			]
 		},
 
 		{
 			"name": "packageinfo",
-			"usage": "packageinfo NAME",
-			"description": "Lists detailed information of all available packages with the given NAME."
+			"usage": "packageinfo NAME [OPTIONS]",
+			"description": "Lists detailed information of all available packages with the given NAME.",
+			"options": [
+				{
+					"name": "-s [--short]",
+					"description":	"Prints a short overview of the package info"
+				},
+			]
 		},
 
 		{
 			"name": "packages",
-			"usage": "packages [CATEGORY_1 [CATEGORY_2 ...]]",
+			"usage": "packages [CATEGORY_1 [CATEGORY_2 ...]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
 			"options": [
@@ -123,16 +138,16 @@ content = {
 			"description":	"Removes the source with the given NAME."
 		},
 
-		# {
-		# 	"name": "setdefaultbranch",
-		# 	"usage": "setdefaultbranch BRANCH",
-		# 	"description": 	"Sets BRANCH as the default branch used during 'install'"
-		# },
-
 		{
 			"name": "sources",
 			"usage": "sources",
 			"description": "Lists all available sources ordered from low rank (top) to high rank (bottom)."
+		},
+
+		{
+			"name": "version",
+			"usage": "version",
+			"description": "Prints the version number of ughub."
 		},
 
 	]

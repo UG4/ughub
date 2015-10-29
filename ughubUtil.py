@@ -56,3 +56,11 @@ def GetCommandlineOptionValue(args, options):
 			if i + 1 < len(args):
 				return args[i+1]
 	return None
+
+# returns a new list that contains all entries from args which do not start with a '-'
+def RemoveOptions(args):
+	filteredArgs = []
+	for a in args:
+		if len(a) > 0 and a[0] != "-":
+			filteredArgs.append(a)
+	return filteredArgs
