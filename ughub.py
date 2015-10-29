@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ################################################################################
-# Copyright 2015 Sebastian Reiter (G-CSC, University Frankfurt am Main)
+# Copyright 2015 Sebastian Reiter (G-CSC, Goethe University Frankfurt)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -511,6 +511,8 @@ def ParseArguments(args):
 
 		elif cmd in ("version", "--version"):
 			print("ughub, version {}".format(ughubVersionString))
+			print("Copyright 2015 G-CSC, Goethe University Frankfurt")
+			print("All rights reserved")
 
 		else:
 			ughubHelp.PrintUsage()
