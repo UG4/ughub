@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ################################################################################
-# Copyright 2015 Sebastian Reiter (G-CSC, Universität Frankfurt am Main)
+# Copyright 2015 Sebastian Reiter (G-CSC, University Frankfurt am Main)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
