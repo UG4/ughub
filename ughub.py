@@ -88,7 +88,7 @@ def ValidateSourceNames(sources):
 		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
 
 
-def RefreshSources(args):
+def UpdateSources(args):
 	sources = LoadSources()
 	ValidateSourceNames(sources)
 
@@ -124,6 +124,23 @@ def RefreshSources(args):
 
 	except LookupError as e:
 		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
+
+
+def ListSources(args):
+	sources = LoadSources()
+	print("List of known sources:")
+	firstOne = True
+	for s in sources:
+		if not firstOne:
+			print("")
+
+		try:
+			print("  {0:8}: '{1}'".format("name", s["name"]))
+			print("  {0:8}: '{1}'".format("branch", s["branch"]))
+			print("  {0:8}: '{1}'".format("url", s["url"]))
+
+		except LookupError as e:
+			raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
 
 
 # returns a list with all available package descriptors
@@ -456,14 +473,17 @@ def ParseArguments(args):
 		elif cmd == "install":
 			InstallPackage(args[1:])
 
-		elif cmd == "refresh":
-			RefreshSources(args[1:])
-
 		elif cmd == "packageinfo":
 			PrintPackageInfo(args[1:])
 
 		elif cmd == "packages":
 			ListPackages(args[1:])
+		
+		elif cmd == "updatesources":
+			UpdateSources(args[1:])
+
+		elif cmd == "sources":
+			ListSources(args[1:])
 
 		elif cmd in ("version", "--version"):
 			print("ughub, version {}".format(ughubVersionString))

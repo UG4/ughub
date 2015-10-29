@@ -19,12 +19,12 @@ content = {
 					"description":	"The branch specified by ARG of the git repository at URL\n"
 									"will be used as source. The default branch is 'master'."
 				},
-				{
-					"name": "-r [--rank] ARG",
-					"description":	"The rank at which the source is added. If the same\n"
-							"package is contained in multiple sources, the one with the\n"
-							"lower rank is used by default."
-				}
+				# {
+				# 	"name": "-r [--rank] ARG",
+				# 	"description":	"The rank at which the source is added. If the same\n"
+				# 			"package is contained in multiple sources, the one with the\n"
+				# 			"lower rank is used by default."
+				# }
 			]
 		},
 
@@ -118,30 +118,30 @@ content = {
 			]
 		},
 
-		{
-			"name": "ranksource",
-			"usage": "ranksource NAME RANK",
-			"description":	"Ranks the source with the given NAME at the given RANK. If the same\n"
-							"package is contained in multiple sources, the one with the lower rank\n"
-							"is used by default."
-		},
+		# {
+		# 	"name": "ranksource",
+		# 	"usage": "ranksource NAME RANK",
+		# 	"description":	"Ranks the source with the given NAME at the given RANK. If the same\n"
+		# 					"package is contained in multiple sources, the one with the lower rank\n"
+		# 					"is used by default."
+		# },
 
-		{
-			"name": "refresh",
-			"usage": "refresh",
-			"description":	"Pulls package information for all sources from their remote repositories."
-		},
-
-		{
-			"name": "removesource",
-			"usage": "removesource NAME",
-			"description":	"Removes the source with the given NAME."
-		},
+		# {
+		# 	"name": "removesource",
+		# 	"usage": "removesource NAME",
+		# 	"description":	"Removes the source with the given NAME."
+		# },
 
 		{
 			"name": "sources",
 			"usage": "sources",
 			"description": "Lists all available sources ordered from low rank (top) to high rank (bottom)."
+		},
+
+		{
+			"name": "updatesources",
+			"usage": "updatesources",
+			"description":	"Pulls package information for all sources from their remote repositories."
 		},
 
 		{
