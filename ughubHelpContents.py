@@ -121,7 +121,7 @@ content = {
 
 		{
 			"name": "packages",
-			"usage": "packages [CATEGORY_1 [CATEGORY_2 ...]] [OPTIONS]",
+			"usage": "packages [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
 			"options": [
@@ -140,6 +140,18 @@ content = {
 					"description":	"Only packages which are not installed are listed."
 				}
 			]
+		},
+
+
+		{
+			"name": "pull",
+			"usage": "pull [PACKAGE_1 [PACKAGE_2 [...]]]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the origins\n"
+							"of PACKAGE_1,...,PACKAGE_N are pulled to their local installations.\n"
+							"Note that PACKAGE_1,...,PACKAGE_N has to be installed before one can\n"
+							"pull new changes (see 'ughub help install').\n"
+							"If PACKAGE_1 was not specified, changes from all remote repositories of\n"
+							"all installed packages are pulled."
 		},
 
 		# {

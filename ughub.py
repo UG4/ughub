@@ -397,6 +397,10 @@ def InstallPackage(args):
 			if os.path.isdir(os.path.join(pkgPath, ".git")):
 				p = subprocess.Popen("git branch --list".split(), cwd = pkgPath, stdout=subprocess.PIPE)
 				gitLog, _ = p.communicate()
+				if p.returncode != 0:
+					raise TransactionError("Couldn't access branch information of package '{0}' at '{1}'"
+											.format(pkg["name"], pkgPath))
+					
 				curBranch = None
 				for line in gitLog.splitlines():
 					if line[0] == "*":
@@ -476,6 +480,54 @@ def InstallPackage(args):
 		return
 
 
+def PackageIsInstalled(pkg):
+	return os.path.isdir(GetPackageDir(pkg))
+
+def PullPackage(pkg):
+	print("> {0}".format(GetPackageDir(pkg)))
+	proc = subprocess.Popen("git pull".split(), cwd = GetPackageDir(pkg))
+	if proc.wait() != 0:
+		raise TransactionError("Couldn't pull changes for package '{0}' at '{1}'"
+							   .format(pkg["name"], GetPackageDir(pkg)))
+
+def Pull(args):
+	packages = LoadPackageDescs()
+
+	failedPulls = []
+
+	if len(args) > 0:
+		for pname in args:
+			try:
+				pkg = ughubUtil.GetFromNestedTable(packages, pname)
+				if not PackageIsInstalled(pkg):
+					raise InvalidPackageError("Package '{0}' is not installed. See 'ughub help install'".format(pname))
+
+				try:
+					PullPackage(pkg)
+				except TransactionError as e:
+					failedPulls.append(e.message)
+
+			except NestedTableEntryNotFoundError:
+				raise failedPulls.append("Unknown package '{0}'".format(pname))
+
+	else:
+	#	check for each known package whether it is installed. If this is the case, perform a pull
+		for pkg in packages:
+			if PackageIsInstalled(pkg):
+				try:
+					PullPackage(pkg)
+				except TransactionError as e:
+					failedPulls.append(e.message)
+
+	if len(failedPulls) > 0:
+		msg = "The following errors occurred when trying to pull changes:"
+		for e in failedPulls:
+			msg = msg + "\n  - " + e
+
+		raise TransactionError(msg)
+
+
+
 def ParseArguments(args):
 	try:
 		if args == None or len(args) == 0:
@@ -502,6 +554,9 @@ def ParseArguments(args):
 
 		elif cmd == "packages":
 			ListPackages(args[1:])
+
+		elif cmd == "pull":
+			Pull(args[1:])
 		
 		elif cmd == "updatesources":
 			UpdateSources(args[1:])
