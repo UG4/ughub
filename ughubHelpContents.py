@@ -29,28 +29,28 @@ content = {
 	"usage": "type 'ughub help' for usage.",
 
 	"commands": [
-		{
-			"name": "addsource",
-			"usage": "addsource NAME URL [OPTIONS]",
-			"description": "Adds a package-source (i.e. a git repository) from the given\n"
-						   "URL. The source may later be referenced by NAME in other commands.\n"
-						   "Valid repositories have to contain a 'package.json' file,\n"
-						   "and optionally 'build_scripts' and 'licenses' folders in their\n"
-						   "top-level directory. The specified URL has to be a valid git-url.",
-			"options": [
-				{
-					"name": "-b [--branch] ARG",
-					"description":	"The branch specified by ARG of the git repository at URL\n"
-									"will be used as source. The default branch is 'master'."
-				},
-				# {
-				# 	"name": "-r [--rank] ARG",
-				# 	"description":	"The rank at which the source is added. If the same\n"
-				# 			"package is contained in multiple sources, the one with the\n"
-				# 			"lower rank is used by default."
-				# }
-			]
-		},
+		# {
+		# 	"name": "addsource",
+		# 	"usage": "addsource NAME URL [OPTIONS]",
+		# 	"description": "Adds a package-source (i.e. a git repository) from the given\n"
+		# 				   "URL. The source may later be referenced by NAME in other commands.\n"
+		# 				   "Valid repositories have to contain a 'package.json' file,\n"
+		# 				   "and optionally 'build_scripts' and 'licenses' folders in their\n"
+		# 				   "top-level directory. The specified URL has to be a valid git-url.",
+		# 	"options": [
+		# 		{
+		# 			"name": "-b [--branch] ARG",
+		# 			"description":	"The branch specified by ARG of the git repository at URL\n"
+		# 							"will be used as source. The default branch is 'master'."
+		# 		},
+		# 		# {
+		# 		# 	"name": "-r [--rank] ARG",
+		# 		# 	"description":	"The rank at which the source is added. If the same\n"
+		# 		# 			"package is contained in multiple sources, the one with the\n"
+		# 		# 			"lower rank is used by default."
+		# 		# }
+		# 	]
+		# },
 
 		{
 			"name": "help",
@@ -61,16 +61,19 @@ content = {
 
 		{
 			"name": "init",
-			"usage": "init [OPTIONS]",
+			"usage": "init [PATH] [OPTIONS]",
 			"description": "Initializes a path for use with ughub. To this end a .ughub folder,\n"
 						   "is created in which information on available and installed packages will\n"
-						   "be stored. It also creates a CMakeLists.txt file, which can later be used\n"
-						   "to build ug and all installed plugins.",
+						   "be stored. Through the optional parameter PATH one may specify a path\n"
+						   "where the initialization shall be performed.\n"
+						   "PATH may either be a relative path or an absolute path. If PATH is omitted,\n"
+						   "initialization is performed in the current directory.",
 			"options": [
 				{
 					"name": "-f [--force]",
-					"description":	"Forces initialization in the current directory, even if a parent\n"
-									"directory already contains a '.ughub' subdirectory."
+					"description":	"Forces initialization, even if a parent directory of the specified\n"
+									"PATH (or of the current directory, if PATH was omitted) already\n"
+									"contains a '.ughub' subdirectory."
 				}
 			]
 		},

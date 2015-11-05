@@ -50,8 +50,8 @@ class TransactionError(Exception): pass
 PackageBranchPair = collections.namedtuple("PackageBranchPair", "package branch")
 
 
-def GetRootDirectory():
-	curDir = os.getcwd()
+def GetRootDirectory(path = None):
+	curDir = path or os.getcwd()
 	while True:
 		if os.path.isdir(os.path.join(curDir, ".ughub")):
 			return curDir
@@ -68,13 +68,23 @@ def GetUGHubDirectory():
 def InitializeDirectory(args):
 	force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
 
-	if os.path.isdir(".ughub"):
-		print("Directory has been initialized already. Aborting.")
+	rootPath = os.getcwd()
+	if len(args) > 0 and args[0][0] != '-':
+		if os.path.isabs(args[0]):
+			rootPath = args[0]
+		else:
+			rootPath = os.path.join(rootPath, args[0])
+
+	targetPath = os.path.normpath(os.path.join(rootPath, ".ughub"))
+	if os.path.isdir(targetPath):
+		if os.path.isfile(os.path.join(targetPath, "sources.json")):
+			print("Directory '{0}' has been initialized already.".format(targetPath))
+			return
 	else:
 		try:
-			rootDir = GetRootDirectory()
+			existingRootDir = GetRootDirectory(targetPath)
 			if not force:
-				print("Warning: Found ughub root path at: {0}".format(rootDir))
+				print("Warning: Found ughub root directory at: {0}".format(existingRootDir))
 				print("call 'ughub init -f' to force initialization in this path.")
 				return
 
@@ -82,20 +92,29 @@ def InitializeDirectory(args):
 			pass
 
 		# this is actually the expected case
-		os.mkdir(".ughub")
-		# create a dictionary that stores the default source-urls
-		sources = 	[{	"name": "UG4",
-						"url": "/home/sreiter/projects/ug4-packages",
-						"branch": "master"}]
+		os.makedirs(targetPath)
 
-		with open(os.path.join(".ughub", "sources.json"), "w") as outfile:
-			json.dump(sources, outfile, indent = 4)
+	# create a dictionary that stores the default source-urls
+	sources = 	[{	"name": "ug4",
+					"url": "/home/sreiter/projects/ug4-packages",
+					"branch": "master"}]
+
+	with open(os.path.join(targetPath, "sources.json"), "w") as outfile:
+		json.dump(sources, outfile, indent = 4)
+	
+	print("initialized ughub directory at '{0}'".format(rootPath))
+	UpdateSources([])
 
 
 def LoadSources(path=None):
-	if path == None:
-		path = GetUGHubDirectory()
-	return json.loads(file(os.path.join(path, "sources.json")).read())
+	try:
+		if path == None:
+			path = GetUGHubDirectory()
+		return json.loads(file(os.path.join(path, "sources.json")).read())
+	except IOError:
+		raise InvalidSourceError("No '{0}/sources.json' file found. "
+								 "Please call 'ughub init' in the root path of your installation."
+								 .format(path))
 
 def ValidateSourceNames(sources):
 	try:
@@ -132,14 +151,14 @@ def UpdateSources(args):
 			srcDir = os.path.join(sourcesDir, name)
 
 			if not os.path.isdir(srcDir):
-				print("Cloning source '{0}', branch '{1}' at '{2}'".
+				print("Cloning source '{0}', branch '{1}' from '{2}'".
 					  format(name, branch, url))
 				proc = subprocess.Popen(["git", "clone", "--branch", branch, url, name], cwd = sourcesDir)
 				if proc.wait() != 0:
-					raise InvalidSourceError("Couldn't check out source '{0}' with branch '{1}' at '{2}'"
+					raise InvalidSourceError("Couldn't clone source '{0}' with branch '{1}' from '{2}'"
 											 .format(name, branch, url))
 			else:
-				print("Updating source '{0}' (branch '{1}') at '{2}'".
+				print("Updating source '{0}' (branch '{1}') from '{2}'".
 					  format(name, branch, url))
 				proc = subprocess.Popen(["git", "pull"], cwd = srcDir)
 				if proc.wait() != 0:
@@ -187,6 +206,9 @@ def LoadPackageDescs():
 			except LookupError:
 				raise InvalidSourceError("Failed to access package list in '{0}'"
 										 .format(packagesFile))
+			except IOError:
+				raise InvalidSourceError("No package descriptor found for the source '{0}'. "
+										 "Please call 'ughub updatesources'.".format(sourceName))
 
 		except LookupError:
 			raise InvalidSourceError("couldn't find field 'name'")
@@ -570,6 +592,7 @@ def ParseArguments(args):
 			print("All rights reserved")
 
 		else:
+			print("Unknown command: '{0}'".format(cmd))
 			ughubHelp.PrintUsage()
 
 	except NoRootDirectoryError:
