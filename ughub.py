@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 ################################################################################
-# Copyright 2015 Sebastian Reiter (G-CSC, Goethe University Frankfurt)
+# Copyright 2015 G-CSC, Goethe University Frankfurt
+# Author: Sebastian Reiter <sreiter@gcsc.uni-frankfurt.de>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +51,7 @@ class TransactionError(Exception): pass
 PackageBranchPair = collections.namedtuple("PackageBranchPair", "package branch")
 
 
-def GetRootDirectory(path = None):
+def GetRootDirectory(path=None):
 	curDir = path or os.getcwd()
 	while True:
 		if os.path.isdir(os.path.join(curDir, ".ughub")):
@@ -61,8 +62,35 @@ def GetRootDirectory(path = None):
 		curDir = nextDir
 
 
-def GetUGHubDirectory():
-	return os.path.join(GetRootDirectory(), ".ughub")
+def GetUGHubDirectory(path=None):
+	return os.path.join(GetRootDirectory(path), ".ughub")
+
+
+def GenerateDefaultSourceFile(path=None):
+	targetPath = GetUGHubDirectory(path)
+
+	sources = 	[{	"name": "ug4",
+					"url": "/home/sreiter/projects/ug4-packages",
+					"branch": "master"}]
+
+	WriteSources(sources, targetPath)
+
+
+def GenerateCMakeLists(path=None):
+	filename = os.path.join(GetRootDirectory(path), "CMakeLists.txt")
+	print("Generating '{0}'".format(filename))
+	f = open(filename, "w")
+	f.write("# WARNING: PLEASE DO NOT CHANGE THIS FILE (any changes may be lost)\n")
+	f.write("# This file was automatically generated and may be overwritten without notice.\n")
+	f.write("\n")
+	f.write("cmake_minimum_required(VERSION 2.6)\n")
+	f.write("project(UG4)\n")
+	f.write("if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ugcore)\n")
+	f.write("	add_subdirectory(ugcore)\n")
+	f.write("else()\n")
+	f.write("	message(FATAL_ERROR \"Please install the 'ugcore' package using 'ughub install ugcore'.\")\n")
+	f.write("endif()\n")
+	f.close()
 
 
 def InitializeDirectory(args):
@@ -75,14 +103,14 @@ def InitializeDirectory(args):
 		else:
 			rootPath = os.path.join(rootPath, args[0])
 
-	targetPath = os.path.normpath(os.path.join(rootPath, ".ughub"))
-	if os.path.isdir(targetPath):
-		if os.path.isfile(os.path.join(targetPath, "sources.json")):
-			print("Directory '{0}' has been initialized already.".format(targetPath))
+	ughubPath = os.path.normpath(os.path.join(rootPath, ".ughub"))
+	if os.path.isdir(ughubPath):
+		if os.path.isfile(os.path.join(ughubPath, "sources.json")):
+			print("Directory '{0}' has been initialized already.".format(ughubPath))
 			return
 	else:
 		try:
-			existingRootDir = GetRootDirectory(targetPath)
+			existingRootDir = GetRootDirectory(ughubPath)
 			if not force:
 				print("Warning: Found ughub root directory at: {0}".format(existingRootDir))
 				print("call 'ughub init -f' to force initialization in this path.")
@@ -92,28 +120,76 @@ def InitializeDirectory(args):
 			pass
 
 		# this is actually the expected case
-		os.makedirs(targetPath)
+		os.makedirs(ughubPath)
 
-	# create a dictionary that stores the default source-urls
-	sources = 	[{	"name": "ug4",
-					"url": "/home/sreiter/projects/ug4-packages",
-					"branch": "master"}]
-
-	with open(os.path.join(targetPath, "sources.json"), "w") as outfile:
-		json.dump(sources, outfile, indent = 4)
-	
+	GenerateDefaultSourceFile(ughubPath)
+	UpdateSources([], ughubPath)
+	GenerateCMakeLists(rootPath)
 	print("initialized ughub directory at '{0}'".format(rootPath))
-	UpdateSources([])
+
+
+def Repair(args):
+	try:
+		LoadSources()
+	except InvalidSourceError:
+		print("Restoring default 'sources.json' file.")
+		GenerateDefaultSourceFile()
+		UpdateSources([])
+
+	GenerateCMakeLists()
+
+
+def WriteSources(sources, path=None):
+	path = GetUGHubDirectory(path)
+	with open(os.path.join(path, "sources.json"), "w") as outfile:
+		json.dump(sources, outfile, indent = 4)
+
+
+def PrintSource(s):
+	print("  {0:8}: '{1}'".format("name", s["name"]))
+	print("  {0:8}: '{1}'".format("branch", s["branch"]))
+	print("  {0:8}: '{1}'".format("url", s["url"]))
+
+
+def AddSource(args):
+	if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":
+		print("ERROR in addsource: Invalid arguments specified. See 'ughub help addsource'.")
+		return
+
+	name		= args[0]
+	url			= args[1]
+	sources 	= LoadSources()
+	branch		= ughubUtil.GetCommandlineOptionValue(args, ("-b", "--branch")) or "master"
+	newSource	= {	"name": name,
+					"url": url,
+					"branch": branch}
+
+	for s in sources:
+		if s["name"] == name:
+			print("ERROR in addsource: A source with name '{0}' exists already".format(name))
+			return
+
+	try:
+		UpdateSource(newSource)
+
+	except InvalidSourceError as e:
+		print("WARNING: Requested source was not added due to errors:")
+		PrintSource(newSource)
+		raise e
+
+	sources.append(newSource)
+	WriteSources(sources)
+	print("The following source was added at rank {0}:".format(len(sources)))
+	PrintSource(newSource)
 
 
 def LoadSources(path=None):
+	path = GetUGHubDirectory(path)
 	try:
-		if path == None:
-			path = GetUGHubDirectory()
 		return json.loads(file(os.path.join(path, "sources.json")).read())
 	except IOError:
 		raise InvalidSourceError("No '{0}/sources.json' file found. "
-								 "Please call 'ughub init' in the root path of your installation."
+								 "Please call 'ughub repair' to generate a new sources.json file."
 								 .format(path))
 
 def ValidateSourceNames(sources):
@@ -131,42 +207,46 @@ def ValidateSourceNames(sources):
 		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
 
 
-def UpdateSources(args):
-	sources = LoadSources()
-	ValidateSourceNames(sources)
-
-	ughubDir = GetUGHubDirectory()
+def UpdateSource(src, path=None):
+	# check for each source whether it was already installed. if that's the case,
+	# perform git pull on that directory. If not, perform git clone.
+	ughubDir = GetUGHubDirectory(path)
 	sourcesDir = os.path.join(ughubDir, "sources")
 	if not os.path.isdir(sourcesDir):
 		os.mkdir(sourcesDir)
 
-	# check for each source whether it was already installed. if that's the case,
-	# perform git pull on that directory. If not, perform git clone.
 	try:
-		for src in sources:
-			name = src["name"]
-			url = src["url"]
-			branch = src["branch"]
+		name = src["name"]
+		url = src["url"]
+		branch = src["branch"]
 
-			srcDir = os.path.join(sourcesDir, name)
+		srcDir = os.path.join(sourcesDir, name)
 
-			if not os.path.isdir(srcDir):
-				print("Cloning source '{0}', branch '{1}' from '{2}'".
-					  format(name, branch, url))
-				proc = subprocess.Popen(["git", "clone", "--branch", branch, url, name], cwd = sourcesDir)
-				if proc.wait() != 0:
-					raise InvalidSourceError("Couldn't clone source '{0}' with branch '{1}' from '{2}'"
-											 .format(name, branch, url))
-			else:
-				print("Updating source '{0}' (branch '{1}') from '{2}'".
-					  format(name, branch, url))
-				proc = subprocess.Popen(["git", "pull"], cwd = srcDir)
-				if proc.wait() != 0:
-					raise InvalidSourceError("Couldn't pull from '{1}' (branch '{0}') for source '{2}'"
-											 .format(branch, url, name))
+		if not os.path.isdir(srcDir):
+			print("Cloning source '{0}', branch '{1}' from '{2}'".
+				  format(name, branch, url))
+			proc = subprocess.Popen(["git", "clone", "--branch", branch, url, name], cwd = sourcesDir)
+			if proc.wait() != 0:
+				raise InvalidSourceError("Couldn't clone source '{0}' with branch '{1}' from '{2}'"
+										 .format(name, branch, url))
+		else:
+			print("Updating source '{0}' (branch '{1}') from '{2}'".
+				  format(name, branch, url))
+			proc = subprocess.Popen(["git", "pull"], cwd = srcDir)
+			if proc.wait() != 0:
+				raise InvalidSourceError("Couldn't pull from '{1}' (branch '{0}') for source '{2}'"
+										 .format(branch, url, name))
 
 	except LookupError as e:
 		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
+
+
+def UpdateSources(args, path=None):
+	sources = LoadSources(path)
+	ValidateSourceNames(sources)
+
+	for src in sources:
+		UpdateSource(src, path)
 
 
 def ListSources(args):
@@ -176,11 +256,10 @@ def ListSources(args):
 	for s in sources:
 		if not firstOne:
 			print("")
+			firstOne = True
 
 		try:
-			print("  {0:8}: '{1}'".format("name", s["name"]))
-			print("  {0:8}: '{1}'".format("branch", s["branch"]))
-			print("  {0:8}: '{1}'".format("url", s["url"]))
+			PrintSource(s)
 
 		except LookupError as e:
 			raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
@@ -269,9 +348,16 @@ def ListPackages(args):
 			print("no packages found for the given criteria")
 			return
 
+		# sort packages alphabetically
+		packageDict = {}
 		for pkg in packages:
-			print("{0:16.16}  {1:10.10}  {2:.50}"
-				  .format(pkg["name"], pkg["prefix"], pkg["url"]))
+			packageDict[pkg["name"]] = packageDict.get(pkg["name"], []) + [pkg]
+
+		for key in sorted(packageDict.keys()):
+			pkgs = packageDict[key]
+			for pkg in pkgs:
+				print("{0:24.24}  {1:10.10} {2:8.8} {3:}"
+					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
 		raise InvalidPackageError(e.message)
@@ -505,45 +591,64 @@ def InstallPackage(args):
 def PackageIsInstalled(pkg):
 	return os.path.isdir(GetPackageDir(pkg))
 
-def PullPackage(pkg):
+def CallGitOnPackage(pkg, gitCommand, args):
+#todo:	check for changes first for 'commit' and 'push', using e.g.
+#		git status --porcelain
 	print("> {0}".format(GetPackageDir(pkg)))
-	proc = subprocess.Popen("git pull".split(), cwd = GetPackageDir(pkg))
+	proc = subprocess.Popen(["git", gitCommand] + args, cwd = GetPackageDir(pkg))
 	if proc.wait() != 0:
-		raise TransactionError("Couldn't pull changes for package '{0}' at '{1}'"
-							   .format(pkg["name"], GetPackageDir(pkg)))
+		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
+							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
 
-def Pull(args):
+def CallGitOnPackages(args, gitCommand):
 	packages = LoadPackageDescs()
 
-	failedPulls = []
+	fails = []
+	firstPackage = True
+
+	# get the first argument that starts with a "-"
+	gitargs = []
+	for i in range(len(args)):
+		if args[i][0] == "-":
+			gitargs = args[i:]
+			args = args[0:i]
+			break
 
 	if len(args) > 0:
 		for pname in args:
+			if not firstPackage:
+				print("")
+			firstPackage = False
+
 			try:
 				pkg = ughubUtil.GetFromNestedTable(packages, pname)
 				if not PackageIsInstalled(pkg):
 					raise InvalidPackageError("Package '{0}' is not installed. See 'ughub help install'".format(pname))
 
 				try:
-					PullPackage(pkg)
+					CallGitOnPackage(pkg, gitCommand, gitargs)
 				except TransactionError as e:
-					failedPulls.append(e.message)
+					fails.append(e.message)
 
 			except NestedTableEntryNotFoundError:
-				raise failedPulls.append("Unknown package '{0}'".format(pname))
+				raise fails.append("Unknown package '{0}'".format(pname))
 
 	else:
 	#	check for each known package whether it is installed. If this is the case, perform a pull
 		for pkg in packages:
 			if PackageIsInstalled(pkg):
-				try:
-					PullPackage(pkg)
-				except TransactionError as e:
-					failedPulls.append(e.message)
+				if not firstPackage:
+					print("")
+				firstPackage = False
 
-	if len(failedPulls) > 0:
-		msg = "The following errors occurred when trying to pull changes:"
-		for e in failedPulls:
+				try:
+					CallGitOnPackage(pkg, gitCommand, gitargs)
+				except TransactionError as e:
+					fails.append(e.message)
+
+	if len(fails) > 0:
+		msg = "The following errors occurred while performing 'git {0}':".format(gitCommand)
+		for e in fails:
 			msg = msg + "\n  - " + e
 
 		raise TransactionError(msg)
@@ -558,12 +663,27 @@ def ParseArguments(args):
 
 		cmd = args[0]
 		
-		if cmd == "help":
+		if cmd == "addsource":
+			AddSource(args[1:])
+
+		elif cmd == "help":
 			print("")
 			if len(args) == 1:
 				ughubHelp.PrintHelp()
 			else:
 				ughubHelp.PrintCommandHelp(args[1])
+
+		elif cmd == "gitcommit":
+			CallGitOnPackages(args[1:], "commit")
+
+		elif cmd == "gitpull":
+			CallGitOnPackages(args[1:], "pull")
+
+		elif cmd == "gitpush":
+			CallGitOnPackages(args[1:], "push")
+
+		elif cmd == "gitstatus":
+			CallGitOnPackages(args[1:], "status")
 
 		elif cmd == "init":
 			InitializeDirectory(args[1:])
@@ -574,17 +694,17 @@ def ParseArguments(args):
 		elif cmd == "packageinfo":
 			PrintPackageInfo(args[1:])
 
-		elif cmd == "packages":
+		elif cmd == "listpackages":
 			ListPackages(args[1:])
 
-		elif cmd == "pull":
-			Pull(args[1:])
+		elif cmd == "repair":
+			Repair(args[1:])
+			
+		elif cmd == "listsources":
+			ListSources(args[1:])
 		
 		elif cmd == "updatesources":
 			UpdateSources(args[1:])
-
-		elif cmd == "sources":
-			ListSources(args[1:])
 
 		elif cmd in ("version", "--version"):
 			print("ughub, version {}".format(ughubVersionString))
@@ -618,6 +738,9 @@ def ParseArguments(args):
 
 	except TransactionError as e:
 		print("ERROR (transaction error)\n  {0}".format(e.message))
+
+	except IOError as e:
+		print("ERROR (io error):\n  {0}".format(e.message))
 
 	print("")
 

@@ -29,34 +29,81 @@ content = {
 	"usage": "type 'ughub help' for usage.",
 
 	"commands": [
-		# {
-		# 	"name": "addsource",
-		# 	"usage": "addsource NAME URL [OPTIONS]",
-		# 	"description": "Adds a package-source (i.e. a git repository) from the given\n"
-		# 				   "URL. The source may later be referenced by NAME in other commands.\n"
-		# 				   "Valid repositories have to contain a 'package.json' file,\n"
-		# 				   "and optionally 'build_scripts' and 'licenses' folders in their\n"
-		# 				   "top-level directory. The specified URL has to be a valid git-url.",
-		# 	"options": [
-		# 		{
-		# 			"name": "-b [--branch] ARG",
-		# 			"description":	"The branch specified by ARG of the git repository at URL\n"
-		# 							"will be used as source. The default branch is 'master'."
-		# 		},
-		# 		# {
-		# 		# 	"name": "-r [--rank] ARG",
-		# 		# 	"description":	"The rank at which the source is added. If the same\n"
-		# 		# 			"package is contained in multiple sources, the one with the\n"
-		# 		# 			"lower rank is used by default."
-		# 		# }
-		# 	]
-		# },
+		{
+			"name": "addsource",
+			"usage": "addsource NAME URL [OPTIONS]",
+			"description": "Adds a package-source (i.e. a git repository) from the given\n"
+						   "URL. The source may later be referenced by NAME in other commands.\n"
+						   "Valid repositories have to contain a 'package.json' file.\n"
+						   "The specified URL has to be a valid git-url.",
+			"options": [
+				{
+					"name": "-b [--branch] ARG",
+					"description":	"The branch specified by ARG of the git repository at URL\n"
+									"will be used as source. The default branch is 'master'."
+				},
+				# {
+				# 	"name": "-r [--rank] ARG",
+				# 	"description":	"The rank at which the source is added. If the same\n"
+				# 			"package is contained in multiple sources, the one with the\n"
+				# 			"lower rank is used by default."
+				# }
+			]
+		},
+
+		{
+			"name": "gitcommit",
+			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, a changes of the working-copies\n"
+							"of the local installations of PACKAGE_1,...,PACKAGE_N are commited.\n"
+							"If PACKAGE_1 was not specified, the operation is performed for all\n"
+							"installed packages."
+		},
+
+		{
+			"name": "gitpull",
+			"usage": "gitpull [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the origins\n"
+							"of PACKAGE_1,...,PACKAGE_N are pulled to their local installations.\n"
+							"Note that PACKAGE_1,...,PACKAGE_N has to be installed before one can\n"
+							"pull new changes (see 'ughub help install').\n"
+							"If PACKAGE_1 was not specified, changes from all remote repositories of\n"
+							"all installed packages are pulled."
+		},
+
+		{
+			"name": "gitpush",
+			"usage": "gitpush [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the local\n"
+							"installations of PACKAGE_1,...,PACKAGE_N are pushed to their remote repositories.\n"
+							"If PACKAGE_1 was not specified, changes from all installed packages are\n"
+							"pushed to their remote repositories."
+		},
+
+		{
+			"name": "gitstatus",
+			"usage": "gitstatus [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, the git-status messages of\n"
+							"the local installations of PACKAGE_1,...,PACKAGE_N are displayed.\n"
+							"If PACKAGE_1 was not specified, git-status messages of all\n"
+							"installed packages are shown."
+		},
 
 		{
 			"name": "help",
 			"usage": "help [COMMAND]",
-			"description": "Shows the help for the given COMMAND, or a list of\n"
-						   "all available commands if no COMMAND was specified."
+			"description": "Call help with one of the COMMANDs listed below to get help for that COMMAND.\n\n"
+						   "'ughub' is a program to automatically download and install packages for\n"
+						   "the UG4 simulation environment. It gathers package information like names,\n"
+						   "urls, and dependencies to other packages from so called package-sources\n"
+						   "(only referred to as 'sources' in the following).\n"
+						   "In order to use 'ughub' one first has to initialize a (preferably empty)\n"
+						   "directory for ughub usage by calling 'ughub init'. Executing any ughub command\n"
+						   "will then always apply to the whole directory tree starting at the first\n"
+						   "parent directory in which 'ughub init' was performed.\n"
+						   "After initializing a directory one typically starts with installing a package\n"
+						   "of interest by calling 'ughub install PACKAGE_NAME'. A list of all available\n"
+						   "packages is displayed by the command 'ughub listpackages'.\n"
 		},
 
 		{
@@ -111,20 +158,8 @@ content = {
 		},
 
 		{
-			"name": "packageinfo",
-			"usage": "packageinfo NAME [OPTIONS]",
-			"description": "Lists detailed information of all available packages with the given NAME.",
-			"options": [
-				{
-					"name": "-s [--short]",
-					"description":	"Prints a short overview of the package info"
-				},
-			]
-		},
-
-		{
-			"name": "packages",
-			"usage": "packages [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
+			"name": "listpackages",
+			"usage": "listpackages [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
 			"options": [
@@ -145,16 +180,22 @@ content = {
 			]
 		},
 
+		{
+			"name": "listsources",
+			"usage": "listsources",
+			"description": "Lists all available sources ordered from low rank (top) to high rank (bottom)."
+		},
 
 		{
-			"name": "pull",
-			"usage": "pull [PACKAGE_1 [PACKAGE_2 [...]]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the origins\n"
-							"of PACKAGE_1,...,PACKAGE_N are pulled to their local installations.\n"
-							"Note that PACKAGE_1,...,PACKAGE_N has to be installed before one can\n"
-							"pull new changes (see 'ughub help install').\n"
-							"If PACKAGE_1 was not specified, changes from all remote repositories of\n"
-							"all installed packages are pulled."
+			"name": "packageinfo",
+			"usage": "packageinfo NAME [OPTIONS]",
+			"description": "Lists detailed information of all available packages with the given NAME.",
+			"options": [
+				{
+					"name": "-s [--short]",
+					"description":	"Prints a short overview of the package info"
+				},
+			]
 		},
 
 		# {
@@ -172,9 +213,12 @@ content = {
 		# },
 
 		{
-			"name": "sources",
-			"usage": "sources",
-			"description": "Lists all available sources ordered from low rank (top) to high rank (bottom)."
+			"name": "repair",
+			"usage": "repair",
+			"description":	"Attempts to repair a broken ughub directory by performing\n"
+							"the following:\n"
+							"- Generating a 'CMakeLists.txt' file in ughub's root directory.\n"
+							"- Restoring the default '.ughub/sources.json' source list (if necessary)."
 		},
 
 		{
