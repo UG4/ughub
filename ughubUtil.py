@@ -1,5 +1,6 @@
 ################################################################################
-# Copyright 2015 Sebastian Reiter (G-CSC, Goethe University Frankfurt)
+# Copyright 2015 G-CSC, Goethe University Frankfurt
+# Author: Sebastian Reiter <sreiter@gcsc.uni-frankfurt.de>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
