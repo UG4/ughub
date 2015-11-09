@@ -1,4 +1,5 @@
 ughub - package managment for the UG4 simulation environment
+
 Copyright 2015 G-CSC, Goethe University Frankfurt
 
 'ughub' allows to easily install all the different plugins and applications that
@@ -19,5 +20,7 @@ directory.
 In order to install 'UG4', create a directory (e.g. $HOME/projects/UG4) and change
 directory to this path ('cd $HOME/projects/UG4').
 Call 'ughub init' to initialize this directory for use with ughub.
+
 'ughub listpackages' will now provide a list of all available packages,
+
 'ughub install ugcore' will install the core components of UG4.
