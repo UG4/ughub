@@ -603,20 +603,35 @@ def CallGitOnPackage(pkg, gitCommand, args):
 		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
 							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
 
+
+def CacheGitPassword():
+	# todo:	This currently only works on unix (tested on linux). A version for Windows
+	#		and possibly OSX has to be added.
+	proc = subprocess.Popen("git config --global credential.helper cache".split())
+	if proc.wait() != 0:
+		raise TransactionError("Couldn't enable password caching! Please check your git version.")
+
+
 def CallGitOnPackages(args, gitCommand):
 	packages = LoadPackageDescs()
 
 	fails = []
 	firstPackage = True
 
-	# get the first argument that starts with a "-"
+	# get the argument separator "---"
 	gitargs = []
 	for i in range(len(args)):
-		if args[i][0] == "-":
-			gitargs = args[i:]
+		if args[i] == "---":
+			gitargs = args[i+1:]
 			args = args[0:i]
 			break
 
+	try:
+		CacheGitPassword()
+	except TransactionError as e:
+		print("WARNING:\n  " + e.message)
+
+	# print("args: {0}, gitargs: {1}".format(args, gitargs))
 	if len(args) > 0:
 		for pname in args:
 			if not firstPackage:
@@ -655,7 +670,6 @@ def CallGitOnPackages(args, gitCommand):
 			msg = msg + "\n  - " + e
 
 		raise TransactionError(msg)
-
 
 
 def ParseArguments(args):

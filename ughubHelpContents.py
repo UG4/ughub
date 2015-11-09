@@ -54,40 +54,52 @@ content = {
 
 		{
 			"name": "gitcommit",
-			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
 			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, a changes of the working-copies\n"
 							"of the local installations of PACKAGE_1,...,PACKAGE_N are commited.\n"
 							"If PACKAGE_1 was not specified, the operation is performed for all\n"
-							"installed packages."
+							"installed packages.\n"
+							"'---' separates arguments to ughub's gitcommit command from arguments\n"
+							"that shall be passed to the underlying git-command itself. Please refer\n"
+							"to git's documentation for available parameters."
 		},
 
 		{
 			"name": "gitpull",
-			"usage": "gitpull [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"usage": "gitpull [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
 			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the origins\n"
 							"of PACKAGE_1,...,PACKAGE_N are pulled to their local installations.\n"
 							"Note that PACKAGE_1,...,PACKAGE_N has to be installed before one can\n"
 							"pull new changes (see 'ughub help install').\n"
 							"If PACKAGE_1 was not specified, changes from all remote repositories of\n"
-							"all installed packages are pulled."
+							"all installed packages are pulled.\n"
+							"'---' separates arguments to ughub's gitpull command from arguments\n"
+							"that shall be passed to the underlying git-command itself. Please refer\n"
+							"to git's documentation for available parameters."
 		},
 
 		{
 			"name": "gitpush",
-			"usage": "gitpush [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"usage": "gitpush [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
 			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the local\n"
 							"installations of PACKAGE_1,...,PACKAGE_N are pushed to their remote repositories.\n"
 							"If PACKAGE_1 was not specified, changes from all installed packages are\n"
-							"pushed to their remote repositories."
+							"pushed to their remote repositories.\n"
+							"'---' separates arguments to ughub's gitpush command from arguments\n"
+							"that shall be passed to the underlying git-command itself. Please refer\n"
+							"to git's documentation for available parameters."
 		},
 
 		{
 			"name": "gitstatus",
-			"usage": "gitstatus [PACKAGE_1 [PACKAGE_2 [...]]] [GIT-OPTIONS]",
+			"usage": "gitstatus [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
 			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, the git-status messages of\n"
 							"the local installations of PACKAGE_1,...,PACKAGE_N are displayed.\n"
 							"If PACKAGE_1 was not specified, git-status messages of all\n"
-							"installed packages are shown."
+							"installed packages are shown.\n"
+							"'---' separates arguments to ughub's gitstatus command from arguments\n"
+							"that shall be passed to the underlying git-command itself. Please refer\n"
+							"to git's documentation for available parameters."
 		},
 
 		{
