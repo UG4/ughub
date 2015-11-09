@@ -5,7 +5,7 @@
 Copyright 2015 G-CSC, Goethe University Frankfurt
 
 'ughub' allows to easily install all the different plugins and applications that
-are built on top of 'UG4'. It automatically handles inter-package dependencies
+are built on top of [UG4](https://github.com/UG4). It automatically handles inter-package dependencies
 and helps in managing the different involved git repositories.
 
 ### Dependencies ###
@@ -26,10 +26,13 @@ to the bash-script `$HOME/bin/ughub/ughub` (`$HOME/bin/ughub/ughub.bat` on windo
 To validate your ughub installation please call `ughub --version` from your home
 directory.
 
-In order to install 'UG4', create a directory (e.g. `$HOME/projects/UG4`) and change
+In order to install [UG4](https://github.com/UG4), create a directory (e.g. `$HOME/projects/UG4`) and change
 directory to this path (`cd $HOME/projects/UG4`).
-Call `ughub init` to initialize this directory for use with ughub.
 
-`ughub listpackages` will now provide a list of all available packages,
+Call 
 
-`ughub install ugcore` will install the core components of UG4.
+- `ughub init` to initialize this directory for use with ughub.
+
+- `ughub listpackages` to list all available packages
+
+- `ughub install ugcore` to finally install the core components of UG4 ([ugcore](https://github.com/UG4/ugcore)).
