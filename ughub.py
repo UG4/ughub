@@ -69,8 +69,8 @@ def GetUGHubDirectory(path=None):
 def GenerateDefaultSourceFile(path=None):
 	targetPath = GetUGHubDirectory(path)
 
-	sources = 	[{	"name": "ug4",
-					"url": "/home/sreiter/projects/ug4-packages",
+	sources = 	[{	"name": "github-ug4",
+					"url": "https://github.com/UG4/ug4-packages.git",
 					"branch": "master"}]
 
 	WriteSources(sources, targetPath)
@@ -353,10 +353,13 @@ def ListPackages(args):
 		for pkg in packages:
 			packageDict[pkg["name"]] = packageDict.get(pkg["name"], []) + [pkg]
 
+		print("{0:24.24}  {1:10.10} {2:11.11} {3:}"
+				.format("NAME", "PREFIX", "SOURCE", "URL"))
+
 		for key in sorted(packageDict.keys()):
 			pkgs = packageDict[key]
 			for pkg in pkgs:
-				print("{0:24.24}  {1:10.10} {2:8.8} {3:}"
+				print("{0:24.24}  {1:10.10} {2:11.11} {3:}"
 					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
