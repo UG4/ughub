@@ -35,4 +35,4 @@ Call
 
 - `ughub listpackages` to list all available packages
 
-- `ughub install ugcore` to finally install the core components of UG4 ([ugcore](https://github.com/UG4/ugcore)).
+- `ughub install ugcore` to finally install [ugcore](https://github.com/UG4/ugcore) (the core components of UG4).
