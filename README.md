@@ -1,6 +1,6 @@
 # ughub #
 
-**ughub** - package managment for the @UG4 simulation environment
+**ughub** - package managment for the [UG4](https://github.com/UG4) simulation environment
 
 Copyright 2015 G-CSC, Goethe University Frankfurt
 
