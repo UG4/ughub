@@ -10,4 +10,4 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # run python on the provided script
-python2 $DIR/ughub.py "$@"
+python $DIR/ughub.py "$@"
