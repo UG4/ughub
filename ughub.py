@@ -400,13 +400,13 @@ def ListPackages(args):
 		for pkg in packages:
 			packageDict[pkg["name"]] = packageDict.get(pkg["name"], []) + [pkg]
 
-		print("{0:24.24}  {1:10.10} {2:11.11} {3:}"
+		print("{0:24.4}  {1:10} {2:11} {3:}"
 				.format("NAME", "PREFIX", "SOURCE", "URL"))
 
 		for key in sorted(packageDict.keys()):
 			pkgs = packageDict[key]
 			for pkg in pkgs:
-				print("{0:24.24}  {1:10.10} {2:11.11} {3:}"
+				print("{0:24}  {1:10} {2:11} {3:}"
 					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
@@ -467,9 +467,11 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 							   branch=None, processedPackageBranchPairs=[]):
 	packagesOut = []
 
+	gotOne = False
 	for pkg in availablePackages:
 		if pkg["name"] == packageName and (source == None or source == pkg["__SOURCE"]):
 			try:
+				gotOne = True
 				useBranch = branch or pkg["defaultBranch"]
 
 				for processedPBP in processedPackageBranchPairs:
@@ -513,23 +515,42 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 			except DependencyError as e:
 				raise DependencyError("{0}\n\n{1}"
 									 .format(e.message, ShortPackageInfo(pkg)))
+	
+	if not gotOne:
+		raise DependencyError("Required package '{0}' is not available in the current sources.\n"
+							  "  Please make sure that all required sources are added to your current\n"
+							  "  ughub installation (use 'ughub listsources' and 'ughub addsource')\n"
+							  "  and make sure that they are all up to date (use 'ughub updatesources')."
+							  .format(packageName))
 	return packagesOut
 
 
 
 def InstallPackage(args):
-	if len(args) == 0 or args[0][0] == "-":
-		print("Please specify a package name. See 'ughub help install'")
+	packageNames	= args
+	options			= []
+
+	for i in range(len(args)):
+		if args[i][0] == "-":
+			packageNames = args[0:i]
+			options = args[i:]
+
+	if len(packageNames) == 0:
+		print("Please specify a package name. See 'ughub help install'.")
 		return
 
-	dryRun	= ughubUtil.HasCommandlineOption(args, ("-d", "--dry"))
-	force	= ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
-	branch	= ughubUtil.GetCommandlineOptionValue(args, ("-b", "--branch"))
-	source	= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
-	packageName	= args[0]
+	dryRun	= ughubUtil.HasCommandlineOption(options, ("-d", "--dry"))
+	force	= ughubUtil.HasCommandlineOption(options, ("-f", "--force"))
+	branch	= ughubUtil.GetCommandlineOptionValue(options, ("-b", "--branch"))
+	source	= ughubUtil.GetCommandlineOptionValue(options, ("-s", "--source"))
 	packages	= LoadPackageDescs()
 	rootDir		= GetRootDirectory()
-	requiredPackages	= BuildPackageDependencyList(packageName, packages, source, branch)
+
+	requiredPackages = []
+	processedPackageBranchPairs = []
+
+	for packageName in packageNames:
+		requiredPackages = requiredPackages + BuildPackageDependencyList(packageName, packages, source, branch, processedPackageBranchPairs)
 
 	print("List of required packages:")
 
