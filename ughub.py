@@ -28,7 +28,8 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-ughubVersionString = "1.0.0"
+# v1.0.1: Supporting 'include' statement in packages.json files.
+g_ughubVersionString = "1.0.1"
 
 import collections
 import json
@@ -49,6 +50,24 @@ class TransactionError(Exception): pass
 
 
 PackageBranchPair = collections.namedtuple("PackageBranchPair", "package branch")
+
+# returns True if the first version number is smaller or equal to the second, False if not.
+def CompareVersions(vstr0, vstr1):
+	nums0 = vstr0.split(".")
+	nums1 = vstr1.split(".")
+	for v0, v1 in zip(nums0, nums1):
+		if v0 <= v1:
+			return True
+	return False
+
+
+# This text is shown when the application terminates. Methods may append
+# warning and error messages to this string.
+# Use AppendToExitText to append your messages
+g_exitText = ""
+def AppendToExitText(text):
+	global g_exitText
+	g_exitText = g_exitText + text
 
 
 def GetRootDirectory(path=None):
@@ -265,35 +284,63 @@ def ListSources(args):
 			raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
 
 
+def LoadPackageDescsFromFile(filename, sourceName):
+	packagesOut = []
+	try:
+		try:
+			content = json.loads(file(filename).read())
+			if "minUGHubVersion" in content:
+				if not CompareVersions(content["minUGHubVersion"], g_ughubVersionString):
+					raise InvalidSourceError("ughub version '{0}' required but current version is '{1}'"
+											 .format(content["minUGHubVersion"], g_ughubVersionString))
+
+			if "include" in content:
+				curDir = os.path.dirname(filename)
+				for incfile in content["include"]:
+					packagesOut = packagesOut + LoadPackageDescsFromFile(os.path.join(curDir, incfile), sourceName)
+
+			if "packages" in content:
+				for pkgDesc in content["packages"]:
+					pkgDesc["__SOURCE"] = sourceName
+					packagesOut.append(pkgDesc)
+
+		except LookupError as e:
+			raise InvalidSourceError("Failed to access {0} in '{1}'"
+									 .format(e.message, filename))
+		except IOError:
+			raise InvalidSourceError("Package descriptor file of source '{0}' not found: '{1}'. "
+									 "Please call 'ughub updatesources'.".format(sourceName, filename))
+
+	except LookupError:
+		raise InvalidSourceError("couldn't find field 'name'")
+	except ValueError as e:
+		raise InvalidSourceError("couldn't parse file '{0}': {1}"
+								 .format(filename, e.message))
+
+	return packagesOut
+
+
 # returns a list with all available package descriptors
 # adds a 'source' entry to each desc which contains the name of the package source
 def LoadPackageDescs():
 	sources		= LoadSources()
 	sourcesDir	= os.path.join(GetUGHubDirectory(), "sources")
 	packagesOut = []
+	errors 		= ""
 
 	for src in sources:
+		sourceName = src["name"]
+		sourceDir = os.path.join(sourcesDir, sourceName)
+		packageDescName = os.path.join(sourceDir, "packages.json")
+
 		try:
-			sourceName = src["name"]
-			try:
-				packagesFile = os.path.join(sourcesDir, sourceName, "packages.json")
-				content = json.loads(file(packagesFile).read())
-				for pkgDesc in content["packages"]:
-					pkgDesc["__SOURCE"] = sourceName
-					packagesOut.append(pkgDesc)
+			packagesOut = packagesOut + LoadPackageDescsFromFile(packageDescName, sourceName)
 
-			except LookupError:
-				raise InvalidSourceError("Failed to access package list in '{0}'"
-										 .format(packagesFile))
-			except IOError:
-				raise InvalidSourceError("No package descriptor found for the source '{0}'. "
-										 "Please call 'ughub updatesources'.".format(sourceName))
+		except InvalidSourceError as e:
+			errors = errors + "Error in source '{0}':\n  {1}\n".format(sourceName, e.message)
 
-		except LookupError:
-			raise InvalidSourceError("couldn't find field 'name'")
-		except ValueError as e:
-			raise InvalidSourceError("couldn't parse file '{0}': {1}"
-									 .format(packagesFile, e.message))
+	if len(errors) > 0:
+		AppendToExitText("WARNING: Problems occurred during 'LoadPackageDescs':\n" + errors)
 
 	return packagesOut
 
@@ -724,7 +771,7 @@ def ParseArguments(args):
 			UpdateSources(args[1:])
 
 		elif cmd in ("version", "--version"):
-			print("ughub, version {}".format(ughubVersionString))
+			print("ughub, version {}".format(g_ughubVersionString))
 			print("Copyright 2015 G-CSC, Goethe University Frankfurt")
 			print("All rights reserved")
 
@@ -760,5 +807,8 @@ def ParseArguments(args):
 		print("ERROR (io error):\n  {0}".format(e.message))
 
 	print("")
+	
+	if len(g_exitText) > 0:
+		print(g_exitText)
 
 ParseArguments(sys.argv[1:])
