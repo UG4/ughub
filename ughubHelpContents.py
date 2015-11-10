@@ -140,8 +140,8 @@ content = {
 
 		{
 			"name": "install",
-			"usage": "install PACKAGE [OPTIONS]",
-			"description":	"Installs/updates the specified PACKAGE\n"
+			"usage": "install PACKAGE_1 [PACKAGE_2 [PACKAGE_3 [...]]] [OPTIONS]",
+			"description":	"Installs/updates the specified PACKAGES\n"
 							"Dependend packages will also be automatically installed/updated.\n"
 							"If an affected package exists already and if the requested branch\n"
 							"does not match the current branch of that package, an error is raised\n"
