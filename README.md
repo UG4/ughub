@@ -8,6 +8,4 @@ Copyright 2015 G-CSC, Goethe University Frankfurt
 are built on top of [UG4](https://github.com/UG4). It automatically handles inter-package dependencies
 and helps in managing the different involved git repositories.
 
-Please have a look at ughub's wiki for more information on installation and usage:
-
-https://github.com/UG4/ughub/wiki
+Please have a look at [ughub's wiki](https://github.com/UG4/ughub/wiki) for more information on installation and usage.
