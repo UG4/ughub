@@ -223,7 +223,7 @@ def ValidateSourceNames(sources):
 				names.append(srcName)
 
 	except LookupError as e:
-		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
+		raise InvalidSourceError("lookup of field '{0}' failed.".format(e))
 
 
 def UpdateSource(src, path=None):
@@ -257,7 +257,7 @@ def UpdateSource(src, path=None):
 										 .format(branch, url, name))
 
 	except LookupError as e:
-		raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
+		raise InvalidSourceError("lookup of field '{0}' failed.".format(e))
 
 
 def UpdateSources(args, path=None):
@@ -281,7 +281,7 @@ def ListSources(args):
 			PrintSource(s)
 
 		except LookupError as e:
-			raise InvalidSourceError("lookup of field '{0}' failed.".format(e.message))
+			raise InvalidSourceError("lookup of field '{0}' failed.".format(e))
 
 
 def LoadPackageDescsFromFile(filename, sourceName):
@@ -306,7 +306,7 @@ def LoadPackageDescsFromFile(filename, sourceName):
 
 		except LookupError as e:
 			raise InvalidSourceError("Failed to access {0} in '{1}'"
-									 .format(e.message, filename))
+									 .format(e, filename))
 		except IOError:
 			raise InvalidSourceError("Package descriptor file of source '{0}' not found: '{1}'. "
 									 "Please call 'ughub updatesources'.".format(sourceName, filename))
@@ -315,7 +315,7 @@ def LoadPackageDescsFromFile(filename, sourceName):
 		raise InvalidSourceError("couldn't find field 'name'")
 	except ValueError as e:
 		raise InvalidSourceError("couldn't parse file '{0}': {1}"
-								 .format(filename, e.message))
+								 .format(filename, e))
 
 	return packagesOut
 
@@ -337,7 +337,7 @@ def LoadPackageDescs():
 			packagesOut = packagesOut + LoadPackageDescsFromFile(packageDescName, sourceName)
 
 		except InvalidSourceError as e:
-			errors = errors + "Error in source '{0}':\n  {1}\n".format(sourceName, e.message)
+			errors = errors + "Error in source '{0}':\n  {1}\n".format(sourceName, e)
 
 	if len(errors) > 0:
 		AppendToExitText("WARNING: Problems occurred during 'LoadPackageDescs':\n" + errors)
@@ -410,7 +410,7 @@ def ListPackages(args):
 					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
-		raise InvalidPackageError(e.message)
+		raise InvalidPackageError(e)
 
 
 def ShortPackageInfo(pkg):
@@ -514,7 +514,7 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 
 			except DependencyError as e:
 				raise DependencyError("{0}\n\n{1}"
-									 .format(e.message, ShortPackageInfo(pkg)))
+									 .format(e, ShortPackageInfo(pkg)))
 	
 	if not gotOne:
 		raise DependencyError("Required package '{0}' is not available in the current sources.\n"
@@ -634,7 +634,7 @@ def InstallPackage(args):
 											  .format(pkgPath, pkg["name"]))
 					except TargetError as e:
 						if dryRun:
-							print("WARNING: {0}".format(e.message))
+							print("WARNING: {0}".format(e))
 							problemsOccurred = True
 						else:
 							raise e
@@ -697,7 +697,7 @@ def CallGitOnPackages(args, gitCommand):
 	try:
 		CacheGitPassword()
 	except TransactionError as e:
-		print("WARNING:\n  " + e.message)
+		print("WARNING:\n  " + e)
 
 	# print("args: {0}, gitargs: {1}".format(args, gitargs))
 	if len(args) > 0:
@@ -714,7 +714,7 @@ def CallGitOnPackages(args, gitCommand):
 				try:
 					CallGitOnPackage(pkg, gitCommand, gitargs)
 				except TransactionError as e:
-					fails.append(e.message)
+					fails.append(e)
 
 			except NestedTableEntryNotFoundError:
 				raise fails.append("Unknown package '{0}'".format(pname))
@@ -730,7 +730,7 @@ def CallGitOnPackages(args, gitCommand):
 				try:
 					CallGitOnPackage(pkg, gitCommand, gitargs)
 				except TransactionError as e:
-					fails.append(e.message)
+					fails.append(e)
 
 	if len(fails) > 0:
 		msg = "The following errors occurred while performing 'git {0}':".format(gitCommand)
@@ -740,8 +740,14 @@ def CallGitOnPackages(args, gitCommand):
 		raise TransactionError(msg)
 
 
-def ParseArguments(args):
+def RunUGHub(args):
 	try:
+		if sys.version_info.major != 2:
+			raise Exception("'ughub' requires Python v2. Currently in use is Python v{0}.{1}.{2}"
+							.format(str(sys.version_info.major),
+									str(sys.version_info.minor),
+									str(sys.version_info.micro)))
+
 		if args == None or len(args) == 0:
 			ughubHelp.PrintUsage()
 			return
@@ -806,30 +812,33 @@ def ParseArguments(args):
 				"calling 'ughub init'.")
 
 	except ughubHelp.MalformedHelpContentsError as e:
-		print("ERROR (malformed help contents)\n  {0}".format(e.message))
+		print("ERROR (malformed help contents)\n  {0}".format(e))
 
 	except InvalidSourceError as e:
-		print("ERROR (invalid source)\n  {0}".format(e.message))
+		print("ERROR (invalid source)\n  {0}".format(e))
 
 	except InvalidPackageError as e:
-		print("ERROR (invalid package)\n  {0}".format(e.message))
+		print("ERROR (invalid package)\n  {0}".format(e))
 
 	except DependencyError as e:
-		print("ERROR (dependency error)\n  {0}".format(e.message))
+		print("ERROR (dependency error)\n  {0}".format(e))
 		print("ERROR (dependency error) ---  see above")
 
 	except TargetError as e:
-		print("ERROR (target error)\n  {0}".format(e.message))
+		print("ERROR (target error)\n  {0}".format(e))
 
 	except TransactionError as e:
-		print("ERROR (transaction error)\n  {0}".format(e.message))
+		print("ERROR (transaction error)\n  {0}".format(e))
 
 	except IOError as e:
-		print("ERROR (io error):\n  {0}".format(e.message))
+		print("ERROR (io error):\n  {0}".format(e))
+
+	except Exception as e:
+		print("ERROR:\n  {0}".format(e))
 
 	print("")
 	
 	if len(g_exitText) > 0:
 		print(g_exitText)
 
-ParseArguments(sys.argv[1:])
+RunUGHub(sys.argv[1:])
