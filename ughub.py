@@ -740,6 +740,9 @@ def CallGitOnPackages(args, gitCommand):
 
 
 def RunUGHub(args):
+
+	exitCode = 1
+
 	try:
 		if sys.version_info.major != 2:
 			raise Exception("'ughub' requires Python v2. Currently in use is Python v{0}.{1}.{2}."
@@ -835,9 +838,16 @@ def RunUGHub(args):
 	except Exception as e:
 		print("ERROR:\n  {0}".format(e))
 
+	else:
+		exitCode = 0
+
 	print("")
 
 	if len(g_exitText) > 0:
 		print(g_exitText)
 
-RunUGHub(sys.argv[1:])
+	return exitCode
+
+
+
+sys.exit(RunUGHub(sys.argv[1:]))
