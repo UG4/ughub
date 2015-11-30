@@ -784,7 +784,7 @@ def RunUGHub(args):
 		elif cmd == "packageinfo":
 			PrintPackageInfo(args[1:])
 
-		elif cmd == "listpackages":
+		elif cmd in ["list", "listpackages"]:
 			ListPackages(args[1:])
 
 		elif cmd == "repair":
