@@ -15,9 +15,9 @@
 #     * Neither the name of the Goethe-Center for Scientific Computing nor the
 #       names of its contributors may be used to endorse or promote products
 #       derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -515,7 +515,7 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 			except DependencyError as e:
 				raise DependencyError("{0}\n\n{1}"
 									 .format(e.message, ShortPackageInfo(pkg)))
-	
+
 	if not gotOne:
 		raise DependencyError("Required package '{0}' is not available in the current sources.\n"
 							  "  Please make sure that all required sources are added to your current\n"
@@ -579,7 +579,7 @@ def InstallPackage(args):
 				if p.returncode != 0:
 					raise TransactionError("Couldn't access branch information of package '{0}' at '{1}'"
 											.format(pkg["name"], pkgPath))
-					
+
 				curBranch = None
 				for line in gitLog.splitlines():
 					if line[0] == "*":
@@ -747,7 +747,7 @@ def ParseArguments(args):
 			return
 
 		cmd = args[0]
-		
+
 		if cmd == "addsource":
 			AddSource(args[1:])
 
@@ -784,10 +784,10 @@ def ParseArguments(args):
 
 		elif cmd == "repair":
 			Repair(args[1:])
-			
+
 		elif cmd == "listsources":
 			ListSources(args[1:])
-		
+
 		elif cmd == "updatesources":
 			UpdateSources(args[1:])
 
@@ -828,8 +828,10 @@ def ParseArguments(args):
 		print("ERROR (io error):\n  {0}".format(e.message))
 
 	print("")
-	
+
 	if len(g_exitText) > 0:
 		print(g_exitText)
+
+ughubUtil.CheckPythonCompatibility(2)
 
 ParseArguments(sys.argv[1:])

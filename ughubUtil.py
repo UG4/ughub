@@ -13,9 +13,9 @@
 #     * Neither the name of the Goethe-Center for Scientific Computing nor the
 #       names of its contributors may be used to endorse or promote products
 #       derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
 # DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
@@ -27,6 +27,7 @@
 ################################################################################
 
 import json
+import sys
 
 class NestedTableEntryNotFoundError(LookupError) : pass
 class NestedTableTraversalError(Exception) : pass
@@ -92,3 +93,14 @@ def RemoveOptions(args):
 		if len(a) > 0 and a[0] != "-":
 			filteredArgs.append(a)
 	return filteredArgs
+
+# checks whether the currently used python version matches the specified major
+# version and exits with an error message if this is not the case
+def CheckPythonCompatibility(py_version_supported_major):
+	py_ver_major = sys.version_info.major
+	py_ver_full  = str(sys.version_info.major) + "." + str(sys.version_info.minor) + "." + str(sys.version_info.micro)
+
+	if py_ver_major != py_version_supported_major:
+	    error_msg =  "ERROR: Unsupported Python Version:\t" + py_ver_full + "\n"
+	    error_msg += "    -> Supported Version\t\t" + str(py_version_supported_major) + ".X"
+	    sys.exit(error_msg)
