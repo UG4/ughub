@@ -744,11 +744,11 @@ def RunUGHub(args):
 	exitCode = 1
 
 	try:
-		if sys.version_info.major != 2:
+		if sys.version_info[0] != 2:
 			raise Exception("'ughub' requires Python v2. Currently in use is Python v{0}.{1}.{2}."
-							.format(str(sys.version_info.major),
-									str(sys.version_info.minor),
-									str(sys.version_info.micro)))
+							.format(str(sys.version_info[0]),
+									str(sys.version_info[1]),
+									str(sys.version_info[2])))
 
 		if args == None or len(args) == 0:
 			ughubHelp.PrintUsage()
