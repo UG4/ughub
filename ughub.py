@@ -39,12 +39,14 @@ import subprocess
 import sys
 
 import ughubHelp
+import ughubProjectFileGenerator
 import ughubUtil
 
-class NoRootDirectoryError(Exception) : pass
+class ArgumentError(Exception) : pass
+class DependencyError(Exception) : pass
 class InvalidSourceError(Exception) : pass
 class InvalidPackageError(Exception) : pass
-class DependencyError(Exception) : pass
+class NoRootDirectoryError(Exception) : pass
 class TargetError(Exception) : pass
 class TransactionError(Exception): pass
 
@@ -739,6 +741,28 @@ def CallGitOnPackages(args, gitCommand):
 		raise TransactionError(msg)
 
 
+def GenerateProjectFiles(args):
+	
+	options			= []
+
+	for i in range(len(args)):
+		if args[i][0] == "-":
+			options = args[i:]
+			args = args[0:i]
+
+	if len(args) < 1:
+		raise ArgumentError("Please specify a TARGET.")
+
+	name			= ughubUtil.GetCommandlineOptionValue(args, ("-n", "--name"))
+	overwriteFiles	= ughubUtil.HasCommandlineOption(options, ("-o", "--overwrite"))
+	deleteFiles		= ughubUtil.HasCommandlineOption(options, ("-d", "--delete"))
+
+	if deleteFiles:
+		ughubProjectFileGenerator.RemoveFiles(GetRootDirectory(), args[0])
+	else:
+		ughubProjectFileGenerator.Run(GetRootDirectory(), args[0], name, overwriteFiles)
+
+
 def RunUGHub(args):
 
 	exitCode = 1
@@ -765,6 +789,9 @@ def RunUGHub(args):
 				ughubHelp.PrintHelp()
 			else:
 				ughubHelp.PrintCommandHelp(args[1])
+
+		elif cmd == "genprojectfiles":
+			GenerateProjectFiles(args[1:])
 
 		elif cmd == "gitcommit":
 			CallGitOnPackages(args[1:], "commit")
@@ -807,6 +834,9 @@ def RunUGHub(args):
 		else:
 			print("Unknown command: '{0}'".format(cmd))
 			ughubHelp.PrintUsage()
+
+	except ArgumentError as e:
+		print("ERROR (bad arguments to '{0}')\n  {1}".format(cmd, e))
 
 	except NoRootDirectoryError:
 		print(	"Couldn't find ughub root directory. Please change directory to a path\n"

@@ -53,6 +53,29 @@ content = {
 		},
 
 		{
+			"name": "genprojectfiles",
+			"usage": "genprojectfiles TARGET [OPTIONS]",
+			"description":	"Generates project-files for the given TARGET platform.\n"
+							"NAME specifies the name of the root project.\n"
+							"Possible TARGET's:\n"
+							"  eclipse\n",
+			"options": [
+				{
+					"name": "-n [--name] ARG",
+					"description":	"Sets ARG as the name of the resulting project."
+				},
+				{
+					"name": "-o [--overwrite]",
+					"description":	"overwrites other project-files of the given TARGET."
+				},
+				{
+					"name": "-d [--delete]",
+					"description":	"removes project-files of the given TARGET."
+				}
+			]
+		},
+
+		{
 			"name": "gitcommit",
 			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
 			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, a changes of the working-copies\n"
