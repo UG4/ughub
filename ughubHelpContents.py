@@ -76,9 +76,21 @@ content = {
 		},
 
 		{
+			"name": "gitadd",
+			"usage": "gitadd [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, files specified under GIT_OPTIONS\n"
+							"are added in the local installations of PACKAGE_1,...,PACKAGE_N.\n"
+							"If PACKAGE_1 was not specified, the operation is performed for all\n"
+							"installed packages.\n"
+							"'---' separates arguments to ughub's gitadd command from arguments\n"
+							"that shall be passed to the underlying git-command itself. Please refer\n"
+							"to git's documentation for available parameters."
+		},
+
+		{
 			"name": "gitcommit",
 			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, a changes of the working-copies\n"
+			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes of the working-copies\n"
 							"of the local installations of PACKAGE_1,...,PACKAGE_N are commited.\n"
 							"If PACKAGE_1 was not specified, the operation is performed for all\n"
 							"installed packages.\n"

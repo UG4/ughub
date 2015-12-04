@@ -698,7 +698,7 @@ def CallGitOnPackages(args, gitCommand):
 	try:
 		CacheGitPassword()
 	except TransactionError as e:
-		print("WARNING:\n  " + e)
+		print("WARNING:\n  " + str(e))
 
 	# print("args: {0}, gitargs: {1}".format(args, gitargs))
 	if len(args) > 0:
@@ -715,7 +715,7 @@ def CallGitOnPackages(args, gitCommand):
 				try:
 					CallGitOnPackage(pkg, gitCommand, gitargs)
 				except TransactionError as e:
-					fails.append(e)
+					fails.append(str(e))
 
 			except NestedTableEntryNotFoundError:
 				raise fails.append("Unknown package '{0}'".format(pname))
@@ -731,7 +731,7 @@ def CallGitOnPackages(args, gitCommand):
 				try:
 					CallGitOnPackage(pkg, gitCommand, gitargs)
 				except TransactionError as e:
-					fails.append(e)
+					fails.append(str(e))
 
 	if len(fails) > 0:
 		msg = "The following errors occurred while performing 'git {0}':".format(gitCommand)
@@ -792,6 +792,9 @@ def RunUGHub(args):
 
 		elif cmd == "genprojectfiles":
 			GenerateProjectFiles(args[1:])
+
+		elif cmd == "gitadd":
+			CallGitOnPackages(args[1:], "add")
 
 		elif cmd == "gitcommit":
 			CallGitOnPackages(args[1:], "commit")
