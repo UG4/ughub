@@ -106,10 +106,11 @@ def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
 		codecs.open(filename, "w", 'utf-8', errors="replace").write(fileContents)
 
 	print(	"Eclipse project files generated.")
+	print(	"Execute the following steps to import or update your project in Eclipse:")
 	print(	"  - Open Eclipse,\n"
 			"  - Click 'File->Import...->General->Existing Project Into Workspace'\n"
-			"  - Choose ug4's root directory, select all projects (selected by default),\n"
-			"    and enable the option 'Search for nested projects' only.\n"
+			"  - Choose ug4's root directory, and enable the options 'Search for nested projects'\n"
+			"    and 'Hide projects that already exist in the workspace'.\n"
 			"  - From Eclipse MARS on (Eclipse v4.5) you may activate the option\n"
 			"    'Project Presentation->Hierarchical' in the dropdown menu of the 'Project Explorer'.")
 
