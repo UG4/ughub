@@ -277,7 +277,7 @@ def ListSources(args):
 	for s in sources:
 		if not firstOne:
 			print("")
-			firstOne = True
+		firstOne = False
 
 		try:
 			PrintSource(s)
