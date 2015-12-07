@@ -42,7 +42,14 @@ def GetCommandsInHelp():
 
 		if type(d) == list:
 			for e in d:
-				out.append(e["name"])
+				name = e["name"]
+				if type(name) == str:
+					out.append(name)
+				elif type(name) == list and len(name) > 0:
+					s = name[0]
+					for i in range(1, len(name)):
+						s = s + ", " + name[i]
+					out.append(s)
 		else:
 			raise MalformedHelpContentsError("'commands' entry has to be a list")
 	except ughubUtil.NestedTableEntryNotFoundError as e:
@@ -55,7 +62,7 @@ def PrintUsage():
 	try:
 		print(GetHelpEntry("usage"))
 	except ughubUtil.NestedTableEntryNotFoundError as e:
-		raise MalformedHelpContentsError(e.message)
+		raise MalformedHelpContentsError(e)
 
 
 def PrintCommands():
@@ -79,7 +86,7 @@ def PrintCommandHelp(cmdName):
 				name = opt["name"]
 				sep = ":"
 				for line in opt["description"].splitlines():
-					print("  {0:20}{1} {2}").format(name, sep, line)
+					print("  {0:20}{1} {2}".format(name, sep, line))
 					name = ""
 					sep = " "
 		except ughubUtil.NestedTableEntryNotFoundError:

@@ -53,7 +53,8 @@ def GetFromNestedTable(nestedTable, key):
 				gotOne = False
 				for e in d:
 				#	e has to be a dict again
-					if e["name"] == k:
+					name = e["name"]
+					if (type(name) == str and name == k) or (type(name) == list and k in name):
 						d = e
 						gotOne = True
 						break
@@ -64,7 +65,7 @@ def GetFromNestedTable(nestedTable, key):
 				raise NestedTableTraversalError(keyPath)
 			keyPath = keyPath.join((".", k))
 	except LookupError as e:
-		raise NestedTableEntryNotFoundError(e.message)
+		raise NestedTableEntryNotFoundError(e)
 
 	return d
 

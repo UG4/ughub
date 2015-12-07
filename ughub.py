@@ -207,7 +207,7 @@ def AddSource(args):
 def LoadSources(path=None):
 	path = GetUGHubDirectory(path)
 	try:
-		return json.loads(file(os.path.join(path, "sources.json")).read())
+		return json.loads(open(os.path.join(path, "sources.json")).read())
 	except IOError:
 		raise InvalidSourceError("No '{0}/sources.json' file found. "
 								 "Please call 'ughub repair' to generate a new sources.json file."
@@ -290,7 +290,7 @@ def LoadPackageDescsFromFile(filename, sourceName):
 	packagesOut = []
 	try:
 		try:
-			content = json.loads(file(filename).read())
+			content = json.loads(open(filename).read())
 			if "minUGHubVersion" in content:
 				if not CompareVersions(content["minUGHubVersion"], g_ughubVersionString):
 					raise InvalidSourceError("ughub version '{0}' required but current version is '{1}'"
@@ -768,11 +768,12 @@ def RunUGHub(args):
 	exitCode = 1
 
 	try:
-		if sys.version_info[0] != 2:
-			raise Exception("'ughub' requires Python v2. Currently in use is Python v{0}.{1}.{2}."
-							.format(str(sys.version_info[0]),
-									str(sys.version_info[1]),
-									str(sys.version_info[2])))
+		# A more elaborate check would be required here, since ughub actually runs with python 3, too.
+		# if sys.version_info[0] != 2:
+		# 	raise Exception("'ughub' requires Python v2. Currently in use is Python v{0}.{1}.{2}."
+		# 					.format(str(sys.version_info[0]),
+		# 							str(sys.version_info[1]),
+		# 							str(sys.version_info[2])))
 
 		if args == None or len(args) == 0:
 			ughubHelp.PrintUsage()
@@ -880,7 +881,6 @@ def RunUGHub(args):
 		print(g_exitText)
 
 	return exitCode
-
 
 
 sys.exit(RunUGHub(sys.argv[1:]))

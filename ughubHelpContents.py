@@ -206,7 +206,7 @@ content = {
 		},
 
 		{
-			"name": "listpackages (list)",
+			"name": ["listpackages", "list"],
 			"usage": "list [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
