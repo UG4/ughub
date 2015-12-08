@@ -576,7 +576,7 @@ def InstallPackage(args):
 			pkgPath = os.path.join(prefixPath, pkg["name"])
 			if os.path.isdir(os.path.join(pkgPath, ".git")):
 				p = subprocess.Popen("git branch".split(), cwd = pkgPath, stdout=subprocess.PIPE)
-				gitLog, _ = p.communicate()
+				gitLog = p.communicate()[0].decode("utf-8")
 				if p.returncode != 0:
 					raise TransactionError("Couldn't access branch information of package '{0}' at '{1}'"
 											.format(pkg["name"], pkgPath))
