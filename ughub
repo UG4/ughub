@@ -9,5 +9,10 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# try to guess a suitable python executable
+for pye in python3 python2.7 python2.6 python2 python; do
+  type -P $pye &>/dev/null && break
+done
+
 # run python on the provided script
-python $DIR/ughub.py "$@"
+exec $pye $DIR/ughub.py "$@"
