@@ -28,8 +28,11 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-# v1.0.1: Supporting 'include' statement in packages.json files.
-g_ughubVersionString = "1.0.1"
+# v1.0.1:	Supporting 'include' statement in packages.json files.
+# v1.0.2:	Various improvements. Most notably auto-detection of outdated remotes
+#			and full support for python 2.6, 2.7, and 3. Furthermore,
+#			project-file-generation for Eclipse has been added.
+g_ughubVersionString = "1.0.2"
 
 import collections
 import json
@@ -58,9 +61,9 @@ def CompareVersions(vstr0, vstr1):
 	nums0 = vstr0.split(".")
 	nums1 = vstr1.split(".")
 	for v0, v1 in zip(nums0, nums1):
-		if v0 <= v1:
-			return True
-	return False
+		if v0 > v1:
+			return False
+	return True
 
 
 # This text is shown when the application terminates. Methods may append
