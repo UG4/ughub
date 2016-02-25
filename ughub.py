@@ -376,28 +376,62 @@ def FilterPackagesAll(packages, categories):
 	return filteredPackages
 
 
-def ListPackages(args):
+def LoadFilteredPackageDescs(args):
 	categories = []
 	matchAll = ughubUtil.HasCommandlineOption(args, ("-a", "--matchall"))
+	installed = ughubUtil.HasCommandlineOption(args, ("-i", "--installed"))
+	notinstalled = ughubUtil.HasCommandlineOption(args, ("-n", "--notinstalled"))
 
 	for arg in args:
 		if arg[0] != "-":
 			categories.append(arg)
 
 	try:
-		packages = LoadPackageDescs()
+		allPackages = LoadPackageDescs()
 
-		if len(packages) == 0:
-			print("no packages found")
-			return
+		if len(allPackages) == 0:
+			return allPackages
+	
+		packages = []
 
+		# select according to installed/notinstalled
+		if installed and notinstalled:
+			print("Cannot use --installed and --notinstalled simultaneously.")
+			raise Exception()
+
+		if installed:
+			for pkg in allPackages:
+				if PackageIsInstalled(pkg):
+					packages.append(pkg)
+
+		if notinstalled:
+			for pkg in allPackages:
+				if not PackageIsInstalled(pkg):
+					packages.append(pkg)
+
+		if not installed and not notinstalled: 
+			for pkg in allPackages:
+				packages.append(pkg)
+
+		# select according to category
 		if matchAll:
 			packages = FilterPackagesAll(packages, categories)
 		elif len(categories) > 0:
 			packages = FilterPackagesAny(packages, categories)
 
+		return packages
+
+	except LookupError as e:
+		raise InvalidPackageError(e)
+	
+
+def ListPackages(args):
+
+	try:
+		packages = LoadFilteredPackageDescs(args)
+
 		if len(packages) == 0:
-			print("no packages found for the given criteria")
+			print("no packages found")
 			return
 
 		# sort packages alphabetically
@@ -785,10 +819,12 @@ def InstallPackage(args):
 		return
 
 def InstallAllPackages(args):
+	source	= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
 	names = []
-	packages = LoadPackageDescs()
+	packages = LoadFilteredPackageDescs(args)
 	for pkg in packages:
-		names.append(pkg["name"])
+		if source == None or source == pkg["__SOURCE"]:
+			names.append(pkg["name"])
 	for arg in args:
 		names.append(arg)
 	InstallPackage(names)

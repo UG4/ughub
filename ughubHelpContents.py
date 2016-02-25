@@ -214,17 +214,25 @@ content = {
 
 		{
 			"name": "installall",
-			"usage": "installall [OPTIONS]",
+			"usage": "installall [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description":	"Installs/updates all packages (for detailed package list run 'ughub list')\n"
 							"Installs all available packages as listed in the current package list.\n"
+							"Through CATEGORY_1,...,CATEGORY_N one can limit the list of packages that\n"
+						   	"will be installed/updated to packages which belong to at least one of those categories.\n"
+							"Using --matchall, --installed, --notinstalled further limits the list of\n"
+							"installed/updated packages accordingly.\n"
 							"If an affected package exists already and if the requested branch\n"
 							"does not match the current branch of that package, an error is raised\n"
 							"unless the --force option is specified. The latter will automatically\n"
 							"perform a checkout of the newly requested branch.",
 			"options": [
 				{
+					"name": "-a [--matchall]",
+					"description":	"Only packages which match all specified categories are installed/updated."
+				},
+				{
 					"name": "-b [--branch] ARG",
-					"description":	"For each package the branch ARG of the associated package repository will\n"
+					"description":	"For each package the branch ARG of the associated PACKAGE repository will\n"
 									"be installed/updated. If not specified, the default branch is used."
 				},
 				{
@@ -234,12 +242,27 @@ content = {
 				},
 				{
 					"name": "-f [--force]",
-					"description":	"Ignores branch conflicts between a requested and a present branch\n"
-									"for existing packages by simply checking out the requested branch."
+					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
+									"installation without further questions. Please note that this may lead to\n"
+									"build-problems later on. Only use if you know what you are doing."
+				},
+				{
+					"name": "-i [--installed]",
+					"description":	"Only already installed packages are updated."
+				},
+				{
+					"name": "-n [--notinstalled]",
+					"description":	"Only packages which are not already installed are installed."
+				},
+				{
+					"name": "-r [--resolve] ARG",
+					"description":	"Resolves conflicts (e.g. branch or remote conflicts) by adjusting the local\n"
+									"repository accordingly. Be sure to commit and push any changes before executing\n"
+									"'ughub install' with this option."
 				},
 				{
 					"name": "-s [--source] ARG",
-					"description":	"For each package installs the package from the source with name ARG."
+					"description":	"Installs packages from the specified source ARG only."
 				},
 			]
 		},
