@@ -195,8 +195,15 @@ content = {
 				},
 				{
 					"name": "-f [--force]",
-					"description":	"Ignores branch conflicts between a requested and a present branch\n"
-									"for existing packages by simply checking out the requested branch."
+					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
+									"installation without further questions. Please note that this may lead to\n"
+									"build-problems later on. Only use if you know what you are doing."
+				},
+				{
+					"name": "-r [--resolve] ARG",
+					"description":	"Resolves conflicts (e.g. branch or remote conflicts) by adjusting the local\n"
+									"repository accordingly. Be sure to commit and push any changes before executing\n"
+									"'ughub install' with this option."
 				},
 				{
 					"name": "-s [--source] ARG",
@@ -239,7 +246,7 @@ content = {
 
 
 		{
-			"name": "listpackages (list)",
+			"name": ["listpackages", "list"],
 			"usage": "list [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
