@@ -206,6 +206,39 @@ content = {
 		},
 
 		{
+			"name": "installall",
+			"usage": "installall [OPTIONS]",
+			"description":	"Installs/updates all packages (for detailed package list run 'ughub list')\n"
+							"Installs all available packages as listed in the current package list.\n"
+							"If an affected package exists already and if the requested branch\n"
+							"does not match the current branch of that package, an error is raised\n"
+							"unless the --force option is specified. The latter will automatically\n"
+							"perform a checkout of the newly requested branch.",
+			"options": [
+				{
+					"name": "-b [--branch] ARG",
+					"description":	"For each package the branch ARG of the associated package repository will\n"
+									"be installed/updated. If not specified, the default branch is used."
+				},
+				{
+					"name": "-d [--dry]",
+					"description":	"Performs a dry run, i.e., prints all dependencies without\n"
+									"installing any files."
+				},
+				{
+					"name": "-f [--force]",
+					"description":	"Ignores branch conflicts between a requested and a present branch\n"
+									"for existing packages by simply checking out the requested branch."
+				},
+				{
+					"name": "-s [--source] ARG",
+					"description":	"For each package installs the package from the source with name ARG."
+				},
+			]
+		},
+
+
+		{
 			"name": "listpackages (list)",
 			"usage": "list [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"

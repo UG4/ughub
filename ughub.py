@@ -659,6 +659,14 @@ def InstallPackage(args):
 			print("WARNING: problems were detected during dry installation run. See above.")
 		return
 
+def InstallAllPackages(args):
+	names = []
+	packages = LoadPackageDescs()
+	for pkg in packages:
+		names.append(pkg["name"])
+	for arg in args:
+		names.append(arg)
+	InstallPackage(names)
 
 def PackageIsInstalled(pkg):
 	return os.path.isdir(GetPackageDir(pkg))
@@ -813,6 +821,9 @@ def RunUGHub(args):
 
 		elif cmd == "install":
 			InstallPackage(args[1:])
+
+		elif cmd == "installall":
+			InstallAllPackages(args[1:])
 
 		elif cmd == "packageinfo":
 			PrintPackageInfo(args[1:])
