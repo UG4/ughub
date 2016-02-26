@@ -221,10 +221,11 @@ content = {
 						   	"will be installed/updated to packages which belong to at least one of those categories.\n"
 							"Using --matchall, --installed, --notinstalled further limits the list of\n"
 							"installed/updated packages accordingly.\n"
-							"If an affected package exists already and if the requested branch\n"
+							"If an affected package exists already and if the requested branch or repository\n"
 							"does not match the current branch of that package, an error is raised\n"
-							"unless the --force option is specified. The latter will automatically\n"
-							"perform a checkout of the newly requested branch.",
+							"unless the --force or --resolve option is specified. The first will keep the old\n"
+							"branch/repository while the second one will automatically perform a checkout of\n"
+							"the newly requested branch/repository.",
 			"options": [
 				{
 					"name": "-a [--matchall]",
@@ -243,8 +244,8 @@ content = {
 				{
 					"name": "-f [--force]",
 					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
-									"installation without further questions. Please note that this may lead to\n"
-									"build-problems later on. Only use if you know what you are doing."
+									"installation without changing any branches or repositories. Please note that\n"
+									"this may lead to build-problems later on. Only use if you know what you are doing."
 				},
 				{
 					"name": "-i [--installed]",
