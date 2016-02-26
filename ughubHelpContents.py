@@ -180,13 +180,15 @@ content = {
 							"Dependend packages will also be automatically installed/updated.\n"
 							"If an affected package exists already and if the requested branch\n"
 							"does not match the current branch of that package, an error is raised\n"
-							"unless the --force option is specified. The latter will automatically\n"
-							"perform a checkout of the newly requested branch.",
+							"unless the --force or --resolve option is specified. The first will\n"
+							"keep the old branch/repository while the second one will automatically\n"
+							"perform a checkout of the newly requested branch/repository.",
 			"options": [
 				{
 					"name": "-b [--branch] ARG",
-					"description":	"The branch ARG of the associated PACKAGE repository will be installed/updated.\n"
-									"If not specified, the default branch of the package is used."
+					"description":	"The branch ARG of the associated PACKAGE repository will be\n"
+									"installed/updated. If not specified, the default branch of\n"
+									"the package is used."
 				},
 				{
 					"name": "-d [--dry]",
@@ -195,15 +197,16 @@ content = {
 				},
 				{
 					"name": "-f [--force]",
-					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
-									"installation without further questions. Please note that this may lead to\n"
-									"build-problems later on. Only use if you know what you are doing."
+					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs\n"
+									"the requested installation/update without changing any branches\n"
+									"or repositories. Please note that this may lead to build-problems\n"
+									"later on. Only use if you know what you are doing."
 				},
 				{
 					"name": "-r [--resolve] ARG",
-					"description":	"Resolves conflicts (e.g. branch or remote conflicts) by adjusting the local\n"
-									"repository accordingly. Be sure to commit and push any changes before executing\n"
-									"'ughub install' with this option."
+					"description":	"Resolves conflicts (e.g. branch or remote conflicts) by adjusting\n"
+									"the local repository accordingly. Be sure to commit and push any\n"
+									"changes before executing 'ughub install' with this option."
 				},
 				{
 					"name": "-s [--source] ARG",
