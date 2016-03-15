@@ -822,11 +822,17 @@ def InstallAllPackages(args):
 	source	= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
 	names = []
 	packages = LoadFilteredPackageDescs(args)
+
 	for pkg in packages:
 		if source == None or source == pkg["__SOURCE"]:
 			names.append(pkg["name"])
+
+	isOption = False
 	for arg in args:
-		names.append(arg)
+		if isOption or arg[0] == "-":
+			isOption = True
+			names.append(arg)
+
 	InstallPackage(names)
 
 def PackageIsInstalled(pkg):
