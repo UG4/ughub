@@ -291,7 +291,12 @@ content = {
 				{
 					"name": "-n [--notinstalled]",
 					"description":	"Only packages which are not installed are listed."
-				}
+				},
+
+				{
+					"name": "-s [--source] ARG",
+					"description":	"Lists packages from the specified source only."
+				},
 			]
 		},
 

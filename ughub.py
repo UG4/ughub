@@ -327,22 +327,25 @@ def LoadPackageDescsFromFile(filename, sourceName):
 
 # returns a list with all available package descriptors
 # adds a 'source' entry to each desc which contains the name of the package source
-def LoadPackageDescs():
+# sourceName is an optional parameter. If specified only the source with the given name
+# is considered. If sourceName == None (by default), packages from all sources are loaded.
+def LoadPackageDescs(sourceName = None):
 	sources		= LoadSources()
 	sourcesDir	= os.path.join(GetUGHubDirectory(), "sources")
 	packagesOut = []
 	errors 		= ""
 
 	for src in sources:
-		sourceName = src["name"]
-		sourceDir = os.path.join(sourcesDir, sourceName)
-		packageDescName = os.path.join(sourceDir, "packages.json")
+		if sourceName == None or sourceName == src["name"]:
+			sname = src["name"]
+			sdir = os.path.join(sourcesDir, sname)
+			packageDescName = os.path.join(sdir, "packages.json")
 
-		try:
-			packagesOut = packagesOut + LoadPackageDescsFromFile(packageDescName, sourceName)
+			try:
+				packagesOut = packagesOut + LoadPackageDescsFromFile(packageDescName, sname)
 
-		except InvalidSourceError as e:
-			errors = errors + "Error in source '{0}':\n  {1}\n".format(sourceName, e)
+			except InvalidSourceError as e:
+				errors = errors + "Error in source '{0}':\n  {1}\n".format(sname, e)
 
 	if len(errors) > 0:
 		AppendToExitText("WARNING: Problems occurred during 'LoadPackageDescs':\n" + errors)
@@ -381,13 +384,16 @@ def LoadFilteredPackageDescs(args):
 	matchAll = ughubUtil.HasCommandlineOption(args, ("-a", "--matchall"))
 	installed = ughubUtil.HasCommandlineOption(args, ("-i", "--installed"))
 	notinstalled = ughubUtil.HasCommandlineOption(args, ("-n", "--notinstalled"))
+	sourceName = ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
 
 	for arg in args:
 		if arg[0] != "-":
 			categories.append(arg)
+		else:
+			break
 
 	try:
-		allPackages = LoadPackageDescs()
+		allPackages = LoadPackageDescs(sourceName)
 
 		if len(allPackages) == 0:
 			return allPackages
@@ -819,13 +825,12 @@ def InstallPackage(args):
 		return
 
 def InstallAllPackages(args):
-	source	= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
-	names = []
-	packages = LoadFilteredPackageDescs(args)
+	source		= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
+	packages	= LoadFilteredPackageDescs(args)
+	names		= []
 
 	for pkg in packages:
-		if source == None or source == pkg["__SOURCE"]:
-			names.append(pkg["name"])
+		names.append(pkg["name"])
 
 	isOption = False
 	for arg in args:
@@ -834,6 +839,7 @@ def InstallAllPackages(args):
 			names.append(arg)
 
 	InstallPackage(names)
+
 
 def PackageIsInstalled(pkg):
 	return os.path.isdir(GetPackageDir(pkg))
