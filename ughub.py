@@ -174,6 +174,36 @@ def PrintSource(s):
 	print("  {0:8}: '{1}'".format("branch", s["branch"]))
 	print("  {0:8}: '{1}'".format("url", s["url"]))
 
+def PurgeSource(args):
+   """ TODO: Purges the specified source from the filesystem if found """
+   pass
+
+def RemoveSource(args):
+   """ Removes specified source from the sources list if found """
+   if (len(args) < 1 or args[0][0] == "-"):
+      print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
+      return
+   
+   sources = LoadSources()
+   if not sources: return
+
+   name = args[0]
+   found = False
+   elem = []
+   for source in sources:
+     if (source['name'] == name):
+         found = True
+         elem = source
+
+   if found:
+      print("The following source was removed: '%s'" % name)
+      PrintSource(source)
+      sources.remove(source)
+      WriteSources(sources)
+      # PurgeSource(name)
+   else:
+      print("The following source '%s' was scheduled to be removed but was not found." % name)
+
 
 def AddSource(args):
 	if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":
@@ -965,6 +995,12 @@ def RunUGHub(args):
 
 		if cmd == "addsource":
 			AddSource(args[1:])
+   
+		elif cmd == "removesource":
+			RemoveSource(args[1:])
+    
+		elif cmd == "purgesource":
+			PurgeSource(args[1:])
 
 		elif cmd == "help":
 			print("")
