@@ -55,11 +55,16 @@ content = {
         {
             "name": "removesource",
             "usage": "removesource NAME",
-            "description": "Removes a package-source (i.e. a git repository) from the sources list\n",
+            "description": "Removes a package-source (i.e. a git repository name) from the sources list\n",
             "options": [
                 {
-                    "name": "-f [--force]",
-                    "description": "Purges after removing package-source all packages installed on filesystem."
+                    "name": "-p [--purge]",
+                    "description": "Purges after removing a package-source from the source list in addition the source ughub hidden dir",
+                },
+                {
+                    "name": "-u [--uninstall]",
+                    "description": "Uninstalls all packages which have been installed with this package source"
+
                 }
             ]
         },

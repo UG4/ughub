@@ -192,7 +192,11 @@ def PrintSource(s):
 
 
 def PurgeSource(args):
-    """ Purges the source from the filesystem"""
+    """
+    Purges specified sources by parameter args from filesystem
+    :param args: sources to be purged
+    :return:
+    """
     if len(args) < 1:
         print("ERROR in purgesource: Invalid arguments specified. See 'ughub help purgesource'.")
 
@@ -203,12 +207,17 @@ def PurgeSource(args):
 
 
 def RemoveSource(args):
-    """ Removes specified source from the sources list if found """
+    """
+    Removes specified sources by parameter args from the sources list
+    :param args: sources to be removed from source list
+    :return:
+    """
     if (len(args) < 2 or args[0][0] == "-"):
         print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
         return
 
-    purge = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+    purge = ughubUtil.HasCommandlineOption(args, ("-p", "--purge"))
+    uninstall = ughubUtil.HasCommandlineOption(args, ("-u", "--uninstall"))
     sources = LoadSources()
     if not sources: return
 
@@ -221,12 +230,17 @@ def RemoveSource(args):
             elem = source
 
     if found:
-        print("The following source was removed: '%s'" % name)
+        # uninstall all associated packages from this source
+        if uninstall: UninstallPackage(LoadPackageDescs(source))
+
         PrintSource(source)
         sources.remove(source)
         WriteSources(sources)
-        if purge:
-            PurgeSource([name])
+
+        # delete soruce from filesystem
+        if purge: PurgeSource([name])
+
+        print("The following source was removed: '%s'" % name)
     else:
         print("The following source '%s' was scheduled to be removed but was not found." % name)
 
@@ -652,6 +666,33 @@ def GetCurrentRemoteGitURLs(pkg, origin="origin"):
 
     return originFetchURL, originPushURL
 
+def UninstallPackage(args):
+    """
+    Uninstalls all specified packages by parameter args
+    :param args:
+    :return:
+    """
+    packageNames = args
+    options = []
+
+    for i in range(len(args)):
+        if args[i][0] == "-":
+            packageNames = args[0:i]
+            options = args[i:]
+            break
+
+    if len(packageNames) == 0:
+        print("Please specify a package name. See 'ughub help uninstall'.")
+        return
+
+    all_packages = LoadPackageDescs()
+    for package in packageNames:
+        for p in all_packages:
+            if p["name"] == package:
+                if PackageIsInstalled(p):
+                     import shutil
+                     shutil.rmtree(os.path.join(GetRootDirectory(), p["name"]))
+
 
 def InstallPackage(args):
     packageNames = args
@@ -1067,6 +1108,9 @@ def RunUGHub(args):
 
         elif cmd == "install":
             InstallPackage(args[1:])
+
+        elif cmd == "uninstall":
+            UninstallPackage(args[1:])
 
         elif cmd == "installall":
             InstallAllPackages(args[1:])
