@@ -175,15 +175,22 @@ def PrintSource(s):
 	print("  {0:8}: '{1}'".format("url", s["url"]))
 
 def PurgeSource(args):
-   """ TODO: Purges the specified source from the filesystem if found """
-   pass
+   """ Purges the source from the filesystem"""
+   if len(args) < 1:
+      print("ERROR in purgesource: Invalid arguments specified. See 'ughub help purgesource'.")
+   
+   source = args[0]
+   import shutil
+   shutil.rmtree('.ughub/sources/' + source)
+   Repair([])
 
 def RemoveSource(args):
    """ Removes specified source from the sources list if found """
-   if (len(args) < 1 or args[0][0] == "-"):
+   if (len(args) < 2 or args[0][0] == "-"):
       print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
       return
    
+   purge = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
    sources = LoadSources()
    if not sources: return
 
@@ -200,10 +207,10 @@ def RemoveSource(args):
       PrintSource(source)
       sources.remove(source)
       WriteSources(sources)
-      # PurgeSource(name)
+      if purge: 
+         PurgeSource([name])
    else:
       print("The following source '%s' was scheduled to be removed but was not found." % name)
-
 
 def AddSource(args):
 	if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":

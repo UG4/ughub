@@ -56,12 +56,18 @@ content = {
 			"name": "removesource",
 			"usage": "removesource NAME",
 			"description": "Removes a package-source (i.e. a git repository) from the sources list\n",
+			"options": [
+				{
+					"name": "-f [--force]",
+					"description":	"Purges after removing package-source all packages installed on filesystem."
+				}
+      ]
 		},
 
 		{
 			"name": "purgesource",
 			"usage": "purgesource NAME",
-			"description": "Purges a package-source (i.e. a git repository) from the filesystem\n",
+			"description": "Purges all packages from source (i.e. all git repositories) from the filesystem\n",
 		},
 
 		{
