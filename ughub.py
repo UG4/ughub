@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-
+from __future__ import print_function
 # v1.0.1:	Supporting 'include' statement in packages.json files.
 # v1.0.2:	Various improvements. Most notably auto-detection of outdated remotes
 #			and full support for python 2.6, 2.7, and 3. Furthermore,
@@ -1067,5 +1067,8 @@ def RunUGHub(args):
 
 	return exitCode
 
+def main():
+	RunUGHub(sys.argv[1:])
 
-sys.exit(RunUGHub(sys.argv[1:]))
+if __name__ == 'main':
+	sys.exit(main())
