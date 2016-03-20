@@ -32,98 +32,101 @@ import os
 
 PathNode = collections.namedtuple("PathTypePair", "path type ignore")
 
+
 def CollectAffectedFiles(path, svnPath, conf):
-	files = sorted(os.listdir(path))
-	affectedFiles = []
-	for f in files:
-		fullName = os.path.join(path, f)
-		if os.path.isdir(fullName):
-			svnName = os.path.join(svnPath, f)
-			affectedFiles = affectedFiles + CollectAffectedFiles(fullName, svnName, conf)
+    files = sorted(os.listdir(path))
+    affectedFiles = []
+    for f in files:
+        fullName = os.path.join(path, f)
+        if os.path.isdir(fullName):
+            svnName = os.path.join(svnPath, f)
+            affectedFiles = affectedFiles + CollectAffectedFiles(fullName, svnName, conf)
 
-	for f in files:
-		fullName = os.path.join(path, f)
-		if os.path.isfile(fullName):
-			svnName = os.path.join(svnPath, f)
-			if ConsiderFile(svnName, conf):
-				affectedFiles.append(AffectedFile(fullName, svnName))
+    for f in files:
+        fullName = os.path.join(path, f)
+        if os.path.isfile(fullName):
+            svnName = os.path.join(svnPath, f)
+            if ConsiderFile(svnName, conf):
+                affectedFiles.append(AffectedFile(fullName, svnName))
 
-	return affectedFiles
+    return affectedFiles
 
 
 def ListPaths(path):
-	pathsOut = []
-	files = os.listdir(path)
-	for f in files:
-		fname = os.path.join(path, f)
-		if os.path.isdir(fname):
-			pathsOut.append(f)
-	return pathsOut
+    pathsOut = []
+    files = os.listdir(path)
+    for f in files:
+        fname = os.path.join(path, f)
+        if os.path.isdir(fname):
+            pathsOut.append(f)
+    return pathsOut
 
 
 def GetEclipseProjectPaths(rootDir):
-	dirs = [	PathNode(rootDir, "root", ["apps", "externals", "plugins", "ugcore"]),
-				PathNode(os.path.join(rootDir, "ugcore"), "leaf", [])]
+    dirs = [PathNode(rootDir, "root", ["apps", "externals", "plugins", "ugcore"]),
+            PathNode(os.path.join(rootDir, "ugcore"), "leaf", [])]
 
-	for subroot in ("apps", "externals", "plugins"):
-		fullDir = os.path.join(rootDir, subroot);
-		leafs = ListPaths(fullDir)
-		dirs.append(PathNode(fullDir, "subroot", leafs))
-		for leaf in leafs:
-			dirs.append(PathNode(os.path.join(fullDir, leaf), "leaf", []))
+    for subroot in ("apps", "externals", "plugins"):
+        fullDir = os.path.join(rootDir, subroot);
+        leafs = ListPaths(fullDir)
+        dirs.append(PathNode(fullDir, "subroot", leafs))
+        for leaf in leafs:
+            dirs.append(PathNode(os.path.join(fullDir, leaf), "leaf", []))
 
-	return dirs
+    return dirs
+
 
 def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
-	localDir = os.path.dirname(os.path.realpath(__file__))
-	templateLeaf = codecs.open(os.path.join(localDir, "project_templates/eclipse-leaf"), "r", "utf-8").read()
-	templateRoot = codecs.open(os.path.join(localDir, "project_templates/eclipse-root"), "r", "utf-8").read()
-	templateFilter = codecs.open(os.path.join(localDir, "project_templates/eclipse-filter"), "r", "utf-8").read()
-	templateCProject = codecs.open(os.path.join(localDir, "project_templates/eclipse-cproject"), "r", "utf-8").read()
+    localDir = os.path.dirname(os.path.realpath(__file__))
+    templateLeaf = codecs.open(os.path.join(localDir, "project_templates/eclipse-leaf"), "r", "utf-8").read()
+    templateRoot = codecs.open(os.path.join(localDir, "project_templates/eclipse-root"), "r", "utf-8").read()
+    templateFilter = codecs.open(os.path.join(localDir, "project_templates/eclipse-filter"), "r", "utf-8").read()
+    templateCProject = codecs.open(os.path.join(localDir, "project_templates/eclipse-cproject"), "r", "utf-8").read()
 
-	pathNodes = GetEclipseProjectPaths(rootDir)
-	for pn in pathNodes:
-		filename = os.path.join(pn.path, ".project")
-		if (not (overwriteFiles or pn.type == "subroot")) and os.path.isfile(filename):
-			continue
+    pathNodes = GetEclipseProjectPaths(rootDir)
+    for pn in pathNodes:
+        filename = os.path.join(pn.path, ".project")
+        if (not (overwriteFiles or pn.type == "subroot")) and os.path.isfile(filename):
+            continue
 
-		if projectName and (pn.type == "root"):
-			pname = projectName
-		else:
-			pname = os.path.basename(pn.path)
+        if projectName and (pn.type == "root"):
+            pname = projectName
+        else:
+            pname = os.path.basename(pn.path)
 
-		if (pn.type == "root") or (pn.type == "subroot"):
-			filters = ""
-			for p in pn.ignore:
-				filters = filters + templateFilter.replace("$IGNOREPATH$", p)
-			template = templateRoot.replace("$FILTERS$", filters)
+        if (pn.type == "root") or (pn.type == "subroot"):
+            filters = ""
+            for p in pn.ignore:
+                filters = filters + templateFilter.replace("$IGNOREPATH$", p)
+            template = templateRoot.replace("$FILTERS$", filters)
 
-		elif pn.type == "leaf":
-			template = templateLeaf
-			codecs.open(os.path.join(pn.path, ".cproject"), "w", 'utf-8', errors="replace").write(templateCProject)
+        elif pn.type == "leaf":
+            template = templateLeaf
+            codecs.open(os.path.join(pn.path, ".cproject"), "w", 'utf-8', errors="replace").write(templateCProject)
 
-		fileContents = template.replace("$PROJECTNAME$", pname);
-		codecs.open(filename, "w", 'utf-8', errors="replace").write(fileContents)
+        fileContents = template.replace("$PROJECTNAME$", pname);
+        codecs.open(filename, "w", 'utf-8', errors="replace").write(fileContents)
 
-	print(	"Eclipse project files generated.")
-	print(	"Execute the following steps to import or update your project in Eclipse:")
-	print(	"  - Open Eclipse,\n"
-			"  - Click 'File->Import...->General->Existing Project Into Workspace'\n"
-			"  - Choose ug4's root directory, and enable the options 'Search for nested projects'\n"
-			"    and 'Hide projects that already exist in the workspace'.\n"
-			"  - From Eclipse MARS on (Eclipse v4.5) you may activate the option\n"
-			"    'Project Presentation->Hierarchical' in the dropdown menu of the 'Project Explorer'.")
+    print("Eclipse project files generated.")
+    print("Execute the following steps to import or update your project in Eclipse:")
+    print("  - Open Eclipse,\n"
+          "  - Click 'File->Import...->General->Existing Project Into Workspace'\n"
+          "  - Choose ug4's root directory, and enable the options 'Search for nested projects'\n"
+          "    and 'Hide projects that already exist in the workspace'.\n"
+          "  - From Eclipse MARS on (Eclipse v4.5) you may activate the option\n"
+          "    'Project Presentation->Hierarchical' in the dropdown menu of the 'Project Explorer'.")
 
 
 def RemoveEclipseProjectFiles(rootDir):
-	pathNodes = GetEclipseProjectPaths(rootDir)
-	for pn in pathNodes:
-		for f in (".project", ".cproject"):
-			filename = os.path.join(pn.path, f)
-			if os.path.isfile(filename):
-				os.remove(filename)
+    pathNodes = GetEclipseProjectPaths(rootDir)
+    for pn in pathNodes:
+        for f in (".project", ".cproject"):
+            filename = os.path.join(pn.path, f)
+            if os.path.isfile(filename):
+                os.remove(filename)
 
-	print("Eclipse project files deleted.")
+    print("Eclipse project files deleted.")
+
 
 # def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
 # 	localDir = os.path.dirname(os.path.realpath(__file__))
@@ -141,7 +144,7 @@ def RemoveEclipseProjectFiles(rootDir):
 # #	write root files
 # 	for d in rootDirs:
 # 		filename = os.path.join(d, ".project")
-		
+
 # 		if os.path.isfile(filename) and not overwriteFiles:
 # 			continue
 
@@ -157,7 +160,7 @@ def RemoveEclipseProjectFiles(rootDir):
 # #	write nested files
 # 	for d in nestedDirs:
 # 		filename = os.path.join(d, ".project")
-		
+
 # 		if os.path.isfile(filename) and not overwriteFiles:
 # 			continue
 
@@ -187,7 +190,7 @@ def RemoveEclipseProjectFiles(rootDir):
 # 	for d in dirs:
 # 		for f in (".project", ".cproject"):
 # 			filename = os.path.join(d, f)
-		
+
 # 			if os.path.isfile(filename):
 # 				os.remove(filename)
 
@@ -195,11 +198,10 @@ def RemoveEclipseProjectFiles(rootDir):
 
 
 def Run(rootDir, targetName, projectName, overwriteFiles):
-	if targetName.lower() == "eclipse":
-		GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles)
+    if targetName.lower() == "eclipse":
+        GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles)
 
 
 def RemoveFiles(rootDir, targetName):
-	if targetName.lower() == "eclipse":
-		RemoveEclipseProjectFiles(rootDir)
-
+    if targetName.lower() == "eclipse":
+        RemoveEclipseProjectFiles(rootDir)
