@@ -59,12 +59,11 @@ content = {
             "options": [
                 {
                     "name": "-p [--purge]",
-                    "description": "Purges after removing a package-source from the source list in addition the source ughub hidden dir",
+                    "description": "Purges after removing a package-source from the source list in addition the source from the ughub hidden dir",
                 },
                 {
                     "name": "-u [--uninstall]",
-                    "description": "Uninstalls all packages which have been installed with this package source"
-
+                    "description": "Uninstall all packages which have been installed with the corresponding package source"
                 }
             ]
         },
@@ -73,6 +72,12 @@ content = {
             "name": "purgesource",
             "usage": "purgesource NAME",
             "description": "Purges all packages from source (i.e. all git repositories) from the filesystem\n",
+        },
+
+        {
+            "name": "uninstall",
+            "usage": "uninstall NAME",
+            "description": "Uninstall a given package from the filesystem\n"
         },
 
         {
