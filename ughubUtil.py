@@ -29,8 +29,12 @@
 import json
 import sys
 
-class NestedTableEntryNotFoundError(LookupError) : pass
-class NestedTableTraversalError(Exception) : pass
+
+class NestedTableEntryNotFoundError(LookupError): pass
+
+
+class NestedTableTraversalError(Exception): pass
+
 
 # Traverses a directory or a list of directories recursively using the specified key.
 # key has to be a string. You may request a nested key by separating
@@ -43,54 +47,55 @@ class NestedTableTraversalError(Exception) : pass
 # throws a NestedTableEntryNotFoundError if the requested entry was not found
 # throws a NestedTableTraversalError if the nested table could not be traversed
 def GetFromNestedTable(nestedTable, key):
-	d = nestedTable
-	try:
-		keyPath = ""
-		for k in key.split("."):
-			if type(d) == dict:
-				d = d[k]
-			elif type(d) == list:
-				gotOne = False
-				for e in d:
-				#	e has to be a dict again
-					name = e["name"]
-					if (type(name) == str and name == k) or (type(name) == list and k in name):
-						d = e
-						gotOne = True
-						break
-				if gotOne == False:
-					raise NestedTableEntryNotFoundError("key '{0}' in table '{1}'".format(k, keyPath))
-					break
-			else:
-				raise NestedTableTraversalError(keyPath)
-			keyPath = keyPath.join((".", k))
-	except LookupError as e:
-		raise NestedTableEntryNotFoundError(e)
+    d = nestedTable
+    try:
+        keyPath = ""
+        for k in key.split("."):
+            if type(d) == dict:
+                d = d[k]
+            elif type(d) == list:
+                gotOne = False
+                for e in d:
+                    #	e has to be a dict again
+                    name = e["name"]
+                    if (type(name) == str and name == k) or (type(name) == list and k in name):
+                        d = e
+                        gotOne = True
+                        break
+                if gotOne == False:
+                    raise NestedTableEntryNotFoundError("key '{0}' in table '{1}'".format(k, keyPath))
+                    break
+            else:
+                raise NestedTableTraversalError(keyPath)
+            keyPath = keyPath.join((".", k))
+    except LookupError as e:
+        raise NestedTableEntryNotFoundError(e)
 
-	return d
+    return d
 
 
 def NestedTableToString(table):
-	return json.dumps(table, indent=4, sort_keys=True)
+    return json.dumps(table, indent=4, sort_keys=True)
 
 
 # returns True if one of the specified options was found
 def HasCommandlineOption(args, options):
-	return any(opt in args for opt in options)
+    return any(opt in args for opt in options)
 
 
 # returns None if the no option was found
 def GetCommandlineOptionValue(args, options):
-	for i in range(0, len(args)):
-		if args[i] in options:
-			if i + 1 < len(args):
-				return args[i+1]
-	return None
+    for i in range(0, len(args)):
+        if args[i] in options:
+            if i + 1 < len(args):
+                return args[i + 1]
+    return None
+
 
 # returns a new list that contains all entries from args which do not start with a '-'
 def RemoveOptions(args):
-	filteredArgs = []
-	for a in args:
-		if len(a) > 0 and a[0] != "-":
-			filteredArgs.append(a)
-	return filteredArgs
+    filteredArgs = []
+    for a in args:
+        if len(a) > 0 and a[0] != "-":
+            filteredArgs.append(a)
+    return filteredArgs
