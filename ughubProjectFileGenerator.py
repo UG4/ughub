@@ -75,11 +75,11 @@ def GetEclipseProjectPaths(rootDir):
 	return dirs
 
 def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
-	localDir = os.path.dirname(os.path.realpath(__file__))
-	templateLeaf = codecs.open(os.path.join(localDir, "project_templates/eclipse-leaf"), "r", "utf-8").read()
-	templateRoot = codecs.open(os.path.join(localDir, "project_templates/eclipse-root"), "r", "utf-8").read()
-	templateFilter = codecs.open(os.path.join(localDir, "project_templates/eclipse-filter"), "r", "utf-8").read()
-	templateCProject = codecs.open(os.path.join(localDir, "project_templates/eclipse-cproject"), "r", "utf-8").read()
+	from pkg_resources import resource_filename
+	templateLeaf = codecs.open(resource_filename('ughub', "project_templates/eclipse-leaf"), "r", "utf-8").read()
+	templateRoot = codecs.open(resource_filename('ughub', "project_templates/eclipse-root"), "r", "utf-8").read()
+	templateFilter = codecs.open(resource_filename('ughub', "project_templates/eclipse-filter"), "r", "utf-8").read()
+	templateCProject = codecs.open(resource_filename('ughub', "project_templates/eclipse-cproject"), "r", "utf-8").read()
 
 	pathNodes = GetEclipseProjectPaths(rootDir)
 	for pn in pathNodes:
@@ -102,7 +102,7 @@ def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
 			template = templateLeaf
 			codecs.open(os.path.join(pn.path, ".cproject"), "w", 'utf-8', errors="replace").write(templateCProject)
 
-		fileContents = template.replace("$PROJECTNAME$", pname);
+		fileContents = template.replace("$PROJECTNAME$", pname)
 		codecs.open(filename, "w", 'utf-8', errors="replace").write(fileContents)
 
 	print(	"Eclipse project files generated.")
@@ -127,8 +127,8 @@ def RemoveEclipseProjectFiles(rootDir):
 
 # def GenerateEclipseProjectFiles(rootDir, projectName, overwriteFiles):
 # 	localDir = os.path.dirname(os.path.realpath(__file__))
-# 	templateNested = codecs.open(os.path.join(localDir, "project_templates/eclipse-nested"), "r", "utf-8").read()
-# 	templateRoot = codecs.open(os.path.join(localDir, "project_templates/eclipse-root"), "r", "utf-8").read()
+# 	templateNested = codecs.open(resource_filename('ughub', "project_templates/eclipse-nested"), "r", "utf-8").read()
+# 	templateRoot = codecs.open(resource_filename('ughub', "project_templates/eclipse-root"), "r", "utf-8").read()
 
 # 	rootDirs = [rootDir]
 # 	nestedDirs = [os.path.join(rootDir, "ugcore")]
