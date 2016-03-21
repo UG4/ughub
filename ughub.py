@@ -41,9 +41,9 @@ import re
 import subprocess
 import sys
 
-import ughubHelp
-import ughubProjectFileGenerator
-import ughubUtil
+from ughub import ughubHelp
+from ughub import ughubProjectFileGenerator
+from ughub import ughubUtil
 
 class ArgumentError(Exception) : pass
 class DependencyError(Exception) : pass
