@@ -1,7 +1,7 @@
+from __future__ import absolute_import
 import sys
 from setuptools import setup
-
-from ughub import g_ughubVersionString
+from ughub.ughub import g_ughubVersionString
 
 metadata = dict(name="ughub",
       version=g_ughubVersionString,
@@ -14,7 +14,7 @@ metadata = dict(name="ughub",
       author='Sebastian Reiter',
       author_email='sreiter@gcsc.uni-frankfurt.de',
       license="3-Clause BSD",
-      package_dir={'ughub': '.'},
+      #package_dir={'ughub': '.'},
       packages=['ughub'],
       entry_points={"console_scripts": ["ughub = ughub.ughub:main"] },
 )
