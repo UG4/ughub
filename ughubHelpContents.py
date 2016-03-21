@@ -59,15 +59,9 @@ content = {
 			"options": [
 				{
 					"name": "-f [--force]",
-					"description":	"Purges after removing package-source all packages installed on filesystem."
+					"description":	"Purge the source from the filesystem even if there are uncommited changes or unpushed changes or no remote origin exists for this repository"
 				}
       ]
-		},
-
-		{
-			"name": "purgesource",
-			"usage": "purgesource NAME",
-			"description": "Purges all packages from source (i.e. all git repositories) from the filesystem\n",
 		},
 
 		{

@@ -186,11 +186,11 @@ def PurgeSource(args):
 
 def RemoveSource(args):
    """ Removes specified source from the sources list if found """
-   if (len(args) < 2 or args[0][0] == "-"):
+   if (len(args) < 1 or args[0][0] == "-"):
       print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
       return
    
-   purge = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+   force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
    sources = LoadSources()
    if not sources: return
 
@@ -207,8 +207,11 @@ def RemoveSource(args):
       PrintSource(source)
       sources.remove(source)
       WriteSources(sources)
-      if purge: 
+
+      if (CheckSourceBeforeRemoval(name) or force):
          PurgeSource([name])
+      else:
+         print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed (local) commits. To force remove specify -f or --force." % name)
    else:
       print("The following source '%s' was scheduled to be removed but was not found." % name)
 
@@ -604,6 +607,36 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 							  "  and make sure that they are all up to date (use 'ughub updatesources')."
 							  .format(packageName))
 	return packagesOut
+
+def CheckSourceBeforeRemoval(source, origin = "origin"):
+	"""
+	Check if a source can savely be removed
+	:param source: the source
+	:param origin: the remote origin
+	:return: True if source repository can be removed save
+	"""
+	# repository has upstream origin
+	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		for line in gitLog.splitlines():
+			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
+			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
+			if not (m1 and m2): return False
+
+	# repository has no (local) changes
+	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitLines()) == 0: return False
+
+	# repository has no unpushed (local) commits
+	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitlines()) == 0: return False
+
+	return True
 
 
 #	Returns the fetch and pull urls of the git repository of the specified package as strings.
