@@ -16,7 +16,8 @@ metadata = dict(name="ughub",
       license="3-Clause BSD",
       package_dir={'ughub': '.'},
       packages=['ughub'],
-      entry_points={"console_scripts": ["ughub = ughub.ughub:main"] },
+      #py_modules=['ughub', 'ughubHelp'],
+      entry_points={"console_scripts": ["ughub = ughub.ughub:main"]},
 )
 
 
