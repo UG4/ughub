@@ -856,7 +856,7 @@ def InstallPackage(args):
 
 def UninstallPackage(args):
 	"""
-	Uninstalls a package / TODO check if package can be safely removed, no local changes, git remote and all commits pushed to remote 
+	Uninstalls a package / TODO check if package can be safely removed, no local changes, git remote and all commits pushed to remote
 	:param args:
 	:return:
 	"""
@@ -876,7 +876,7 @@ def UninstallPackage(args):
 		for p in all_packages:
 			if p["name"] == package:
 				print(p["prefix"])
-				if PackageIsInstalled(p):
+				if PackageIsInstalled(p) and CheckPackageBeforeUninstall(p):
 					 import shutil
 					 shutil.rmtree(os.path.join(GetRootDirectory(), os.path.join(p["prefix"], p["name"]))
 
