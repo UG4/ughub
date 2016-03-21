@@ -27,7 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
-from __future__ import print_function, absolute_import
+from __future__ import print_function
 # v1.0.1:	Supporting 'include' statement in packages.json files.
 # v1.0.2:	Various improvements. Most notably auto-detection of outdated remotes
 #			and full support for python 2.6, 2.7, and 3. Furthermore,
@@ -41,12 +41,9 @@ import re
 import subprocess
 import sys
 
-#from . import ughubHelp
-#from . import ughubProjectFileGenerator
-#from . import ughubUtil
-from ughub import ughubHelp
-from ughub import ughubProjectFileGenerator
-from ughub import ughubUtil
+import ughubHelp
+import ughubProjectFileGenerator
+import ughubUtil
 
 class ArgumentError(Exception) : pass
 class DependencyError(Exception) : pass
