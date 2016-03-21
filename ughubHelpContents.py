@@ -53,6 +53,24 @@ content = {
 		},
 
 		{
+			"name": "removesource",
+			"usage": "removesource NAME",
+			"description": "Removes a package-source (i.e. a git repository) from the sources list\n",
+			"options": [
+				{
+					"name": "-f [--force]",
+					"description":	"Purges after removing package-source all packages installed on filesystem."
+				}
+      ]
+		},
+
+		{
+			"name": "purgesource",
+			"usage": "purgesource NAME",
+			"description": "Purges all packages from source (i.e. all git repositories) from the filesystem\n",
+		},
+
+		{
 			"name": "genprojectfiles",
 			"usage": "genprojectfiles TARGET [OPTIONS]",
 			"description":	"Generates project-files for the given TARGET platform.\n"
@@ -324,12 +342,6 @@ content = {
 		# 	"description":	"Ranks the source with the given NAME at the given RANK. If the same\n"
 		# 					"package is contained in multiple sources, the one with the lower rank\n"
 		# 					"is used by default."
-		# },
-
-		# {
-		# 	"name": "removesource",
-		# 	"usage": "removesource NAME",
-		# 	"description":	"Removes the source with the given NAME."
 		# },
 
 		{
