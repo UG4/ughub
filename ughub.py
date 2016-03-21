@@ -886,7 +886,29 @@ def CheckPackageBeforeUninstall(package):
 	:param package:
 	:return:
 	"""
-	pass
+	# repository has upstream origin
+	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), "",), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		for line in gitLog.splitlines():
+			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
+			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
+			if not (m1 and m2): return False
+
+	# repository has no (local) changes
+	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitLines()) == 0: return False
+
+	# repository has no unpushed (local) commits
+	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitlines()) == 0: return False
+
+	return True
+
 
 def InstallAllPackages(args):
 	source		= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
