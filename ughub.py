@@ -44,9 +44,9 @@ import sys
 #from . import ughubHelp
 #from . import ughubProjectFileGenerator
 #from . import ughubUtil
-import ughubHelp
-import ughubProjectFileGenerator
-import ughubUtil
+from ughub import ughubHelp
+from ughub import ughubProjectFileGenerator
+from ughub import ughubUtil
 
 class ArgumentError(Exception) : pass
 class DependencyError(Exception) : pass
