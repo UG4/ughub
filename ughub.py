@@ -181,8 +181,8 @@ def PurgeSource(args):
 def RemoveSource(args):
    """ Removes specified source from the sources list if found """
    if (len(args) < 1 or args[0][0] == "-"):
-      print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
-      return
+	  print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
+	  return
    
    sources = LoadSources()
    if not sources: return
@@ -191,18 +191,18 @@ def RemoveSource(args):
    found = False
    elem = []
    for source in sources:
-     if (source['name'] == name):
-         found = True
-         elem = source
+	 if (source['name'] == name):
+		 found = True
+		 elem = source
 
    if found:
-      print("The following source was removed: '%s'" % name)
-      PrintSource(source)
-      sources.remove(source)
-      WriteSources(sources)
-      # PurgeSource(name)
+	  print("The following source was removed: '%s'" % name)
+	  PrintSource(source)
+	  sources.remove(source)
+	  WriteSources(sources)
+	  # PurgeSource(name)
    else:
-      print("The following source '%s' was scheduled to be removed but was not found." % name)
+	  print("The following source '%s' was scheduled to be removed but was not found." % name)
 
 
 def AddSource(args):
@@ -756,11 +756,11 @@ def InstallPackage(args):
 						print(textBranchConflictUF.format("NOTE", pkg["name"], curBranch, pkg["__BRANCH"]))
 						print("The required branch will be automatically checked out (--resolve)")
 						if not dryRun:
-					 		proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
-					 		if proc.wait() != 0:
-					 			raise TransactionError("Trying to resolve branch conflict but couldn't check "
-					 								   "out branch '{0}' of package '{1}' at '{2}'"
-					 								   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
+							proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
+							if proc.wait() != 0:
+								raise TransactionError("Trying to resolve branch conflict but couldn't check "
+													   "out branch '{0}' of package '{1}' at '{2}'"
+													   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
 					elif force:
 						print(textBranchConflictUF.format("WARNING", pkg["name"], curBranch, pkg["__BRANCH"]))
 						print("The warning will be ignored (--force). This may result in build problems!")
@@ -846,13 +846,47 @@ def InstallPackage(args):
 
 		else:
 			raise InvalidPackageError("Unsupported repository type of package '{0}': '{1}'"
-							   		  .format(pkg["name"], pkg["repoType"]))
+									  .format(pkg["name"], pkg["repoType"]))
 
 	if dryRun:
 		print("Dry run. Nothing was installed/updated.")
 		if problemsOccurred:
 			print("WARNING: problems were detected during dry installation run. See above.")
 		return
+
+def UninstallPackage(args):
+	"""
+	Uninstalls a package / TODO check if package can be safely removed, no local changes, git remote and all commits pushed to remote 
+	:param args:
+	:return:
+	"""
+	packageNames = args
+
+	for i in range(len(args)):
+		if args[i][0] == "-":
+			packageNames = args[0:i]
+			break
+
+	if len(packageNames) == 0:
+		print("Please specify a package name. See 'ughub help uninstall'.")
+		return
+
+	all_packages = LoadPackageDescs()
+	for package in packageNames:
+		for p in all_packages:
+			if p["name"] == package:
+				print(p["prefix"])
+				if PackageIsInstalled(p):
+					 import shutil
+					 shutil.rmtree(os.path.join(GetRootDirectory(), os.path.join(p["prefix"], p["name"]))
+
+def CheckPackageBeforeUninstall(package):
+	"""
+	Checks if a package can be removed
+	:param package:
+	:return:
+	"""
+	pass
 
 def InstallAllPackages(args):
 	source		= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
@@ -996,11 +1030,8 @@ def RunUGHub(args):
 		if cmd == "addsource":
 			AddSource(args[1:])
    
-		elif cmd == "removesource":
-			RemoveSource(args[1:])
-    
-		elif cmd == "purgesource":
-			PurgeSource(args[1:])
+		elif cmd == "uninstall":
+			UninstallPackage(args[1:])
 
 		elif cmd == "help":
 			print("")

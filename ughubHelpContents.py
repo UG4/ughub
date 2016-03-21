@@ -52,17 +52,11 @@ content = {
 			]
 		},
 
-		{
-			"name": "removesource",
-			"usage": "removesource NAME",
-			"description": "Removes a package-source (i.e. a git repository) from the sources list\n",
-		},
-
-		{
-			"name": "purgesource",
-			"usage": "purgesource NAME",
-			"description": "Purges a package-source (i.e. a git repository) from the filesystem\n",
-		},
+		 {
+            "name": "uninstall",
+            "usage": "uninstall NAME",
+            "description": "Uninstall a given package from the filesystem\n"
+        },
 
 		{
 			"name": "genprojectfiles",
