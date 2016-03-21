@@ -190,47 +190,6 @@ def PrintSource(s):
     print("  {0:8}: '{1}'".format("branch", s["branch"]))
     print("  {0:8}: '{1}'".format("url", s["url"]))
 
-
-def PurgeSource(args):
-    """ Purges the source from the filesystem"""
-    if len(args) < 1:
-        print("ERROR in purgesource: Invalid arguments specified. See 'ughub help purgesource'.")
-
-    source = args[0]
-    import shutil
-    shutil.rmtree('.ughub/sources/' + source)
-    Repair([])
-
-
-def RemoveSource(args):
-    """ Removes specified source from the sources list if found """
-    if (len(args) < 2 or args[0][0] == "-"):
-        print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
-        return
-
-    purge = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
-    sources = LoadSources()
-    if not sources: return
-
-    name = args[0]
-    found = False
-    elem = []
-    for source in sources:
-        if (source['name'] == name):
-            found = True
-            elem = source
-
-    if found:
-        print("The following source was removed: '%s'" % name)
-        PrintSource(source)
-        sources.remove(source)
-        WriteSources(sources)
-        if purge:
-            PurgeSource([name])
-    else:
-        print("The following source '%s' was scheduled to be removed but was not found." % name)
-
-
 def AddSource(args):
     if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":
         print("ERROR in addsource: Invalid arguments specified. See 'ughub help addsource'.")
@@ -1030,12 +989,6 @@ def RunUGHub(args):
 
         if cmd == "addsource":
             AddSource(args[1:])
-
-        elif cmd == "removesource":
-            RemoveSource(args[1:])
-
-        elif cmd == "purgesource":
-            PurgeSource(args[1:])
 
         elif cmd == "help":
             print("")
