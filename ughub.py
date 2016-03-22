@@ -174,36 +174,6 @@ def PrintSource(s):
 	print("  {0:8}: '{1}'".format("branch", s["branch"]))
 	print("  {0:8}: '{1}'".format("url", s["url"]))
 
-def PurgeSource(args):
-   """ TODO: Purges the specified source from the filesystem if found """
-   pass
-
-def RemoveSource(args):
-   """ Removes specified source from the sources list if found """
-   if (len(args) < 1 or args[0][0] == "-"):
-	  print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
-	  return
-   
-   sources = LoadSources()
-   if not sources: return
-
-   name = args[0]
-   found = False
-   elem = []
-   for source in sources:
-	 if (source['name'] == name):
-		 found = True
-		 elem = source
-
-   if found:
-	  print("The following source was removed: '%s'" % name)
-	  PrintSource(source)
-	  sources.remove(source)
-	  WriteSources(sources)
-	  # PurgeSource(name)
-   else:
-	  print("The following source '%s' was scheduled to be removed but was not found." % name)
-
 
 def AddSource(args):
 	if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":
@@ -856,8 +826,8 @@ def InstallPackage(args):
 
 def UninstallPackage(args):
 	"""
-	Uninstalls a package / TODO check if package can be safely removed, no local changes, git remote and all commits pushed to remote
-	:param args:
+	Uninstalls a package
+	:param args: the packages to be removed
 	:return:
 	"""
 	packageNames = args
@@ -877,14 +847,15 @@ def UninstallPackage(args):
 			if p["name"] == package:
 				print(p["prefix"])
 				if PackageIsInstalled(p) and CheckPackageBeforeUninstall(p):
-					 import shutil
-					 shutil.rmtree(os.path.join(GetRootDirectory(), os.path.join(p["prefix"], p["name"]))
+					import shutil
+					shutil.rmtree(os.path.join(GetRootDirectory(), os.path.join(p["prefix"], p["name"])))
+
 
 def CheckPackageBeforeUninstall(package):
 	"""
-	Checks if a package can be removed
-	:param package:
-	:return:
+	Checks if a package can be removed safely
+	:param package: the package
+	:return: True if package can be removed safely otherwise False
 	"""
 	# repository has upstream origin
 	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), "",), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
@@ -893,19 +864,22 @@ def CheckPackageBeforeUninstall(package):
 		for line in gitLog.splitlines():
 			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
 			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
-			if not (m1 and m2): return False
+			if not (m1 and m2):
+				return False
 
 	# repository has no (local) changes
 	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
-		if not len(gitLog.splitLines()) == 0: return False
+		if not len(gitLog.splitLines()) == 0:
+			return False
 
 	# repository has no unpushed (local) commits
 	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
-		if not len(gitLog.splitlines()) == 0: return False
+		if not len(gitLog.splitlines()) == 0:
+			return False
 
 	return True
 
