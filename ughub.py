@@ -624,10 +624,10 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 
 def CheckSourceBeforeRemoval(source, origin = "origin"):
 	"""
-	Check if a source can savely be removed
+	Checks if a source can safely be removed and indicates this by return value
 	:param source: the source
 	:param origin: the remote origin
-	:return: True if source repository can be removed save
+	:return: True if source repository may be removed harmlessly otherwise False
 	"""
 	# repository has upstream origin
 	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
