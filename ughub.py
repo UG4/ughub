@@ -824,6 +824,7 @@ def InstallPackage(args):
 			print("WARNING: problems were detected during dry installation run. See above.")
 		return
 
+
 def UninstallPackage(args):
 	"""
 	Uninstalls a package
@@ -903,6 +904,7 @@ def InstallAllPackages(args):
 
 def PackageIsInstalled(pkg):
 	return os.path.isdir(GetPackageDir(pkg))
+
 
 def CallGitOnPackage(pkg, gitCommand, args):
 #todo:	check for changes first for 'commit' and 'push', using e.g.
