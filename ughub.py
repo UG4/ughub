@@ -222,7 +222,8 @@ def RemoveSource(args):
 		if (CheckSourceBeforeRemoval(name) or force):
 			PurgeSource(name)
 		else:
-			print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed (local) commits. To force removal specify -f or --force." % name)
+			print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed "
+				  "(local) commits. To force removal specify -f or --force." % name)
 	else:
 		print("The following source '%s' was scheduled to be removed but was not found." % name)
 
@@ -620,6 +621,7 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 							  .format(packageName))
 	return packagesOut
 
+
 def CheckSourceBeforeRemoval(source, origin = "origin"):
 	"""
 	Check if a source can savely be removed
@@ -634,19 +636,22 @@ def CheckSourceBeforeRemoval(source, origin = "origin"):
 		for line in gitLog.splitlines():
 			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
 			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
-			if not (m1 and m2): return False
+			if not (m1 and m2):
+				return False
 
 	# repository has no (local) changes
 	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
-		if not len(gitLog.splitLines()) == 0: return False
+		if not len(gitLog.splitLines()) == 0:
+			return False
 
 	# repository has no unpushed (local) commits
 	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
-		if not len(gitLog.splitlines()) == 0: return False
+		if not len(gitLog.splitlines()) == 0:
+			return False
 
 	return True
 
