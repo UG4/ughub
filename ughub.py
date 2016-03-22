@@ -174,46 +174,58 @@ def PrintSource(s):
 	print("  {0:8}: '{1}'".format("branch", s["branch"]))
 	print("  {0:8}: '{1}'".format("url", s["url"]))
 
-def PurgeSource(args):
-   """ Purges the source from the filesystem"""
-   if len(args) < 1:
-      print("ERROR in purgesource: Invalid arguments specified. See 'ughub help purgesource'.")
-   
-   source = args[0]
-   import shutil
-   shutil.rmtree('.ughub/sources/' + source)
-   Repair([])
+
+def PurgeSource(*sources):
+	"""
+	Purges the sources from the filesystem.
+	Supply a list and unpack with the splat operator or provide varargs the regular way.
+	:return:
+    :param sources:
+    :return:
+    """
+	if (len(sources) == 0): return
+
+	import shutil
+	for source in sources:
+		shutil.rmtree('.ughub/sources/' + source)
+
+	Repair([])
+
 
 def RemoveSource(args):
-   """ Removes specified source from the sources list if found """
-   if (len(args) < 1 or args[0][0] == "-"):
-      print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
-      return
-   
-   force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
-   sources = LoadSources()
-   if not sources: return
+	"""
+	Removes the specified sources from the internal sources list
+	:param args: command line arguments - the sources' names
+	:return:
+	"""
+	if (len(args) < 1 or args[0][0] == "-"):
+		print("ERROR in removesource: Invalid arguments specified. See 'ughub help removesource'.")
+		return
 
-   name = args[0]
-   found = False
-   elem = []
-   for source in sources:
-     if (source['name'] == name):
-         found = True
-         elem = source
+	force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+	sources = LoadSources()
+	if not sources: return
 
-   if found:
-      print("The following source was removed: '%s'" % name)
-      PrintSource(source)
-      sources.remove(source)
-      WriteSources(sources)
+	name = args[0]
+	found = False
+	elem = []
+	for source in sources:
+		if (source['name'] == name):
+			found = True
+			elem = source
 
-      if (CheckSourceBeforeRemoval(name) or force):
-         PurgeSource([name])
-      else:
-         print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed (local) commits. To force remove specify -f or --force." % name)
-   else:
-      print("The following source '%s' was scheduled to be removed but was not found." % name)
+	if found:
+		print("The following source was removed: '%s'" % name)
+		PrintSource(source)
+		sources.remove(source)
+		WriteSources(sources)
+		if (CheckSourceBeforeRemoval(name) or force):
+			PurgeSource(name)
+		else:
+			print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed (local) commits. To force removal specify -f or --force." % name)
+	else:
+		print("The following source '%s' was scheduled to be removed but was not found." % name)
+
 
 def AddSource(args):
 	if len(args) < 2 or args[0][0] == "-" or args[1][0] == "-":
@@ -437,7 +449,7 @@ def LoadFilteredPackageDescs(args):
 
 		if len(allPackages) == 0:
 			return allPackages
-	
+
 		packages = []
 
 		# select according to installed/notinstalled
@@ -455,7 +467,7 @@ def LoadFilteredPackageDescs(args):
 				if not PackageIsInstalled(pkg):
 					packages.append(pkg)
 
-		if not installed and not notinstalled: 
+		if not installed and not notinstalled:
 			for pkg in allPackages:
 				packages.append(pkg)
 
@@ -469,7 +481,7 @@ def LoadFilteredPackageDescs(args):
 
 	except LookupError as e:
 		raise InvalidPackageError(e)
-	
+
 
 def ListPackages(args):
 
@@ -769,7 +781,7 @@ def InstallPackage(args):
 					elif force:
 						print(textRemoteConflictUF.format("WARNING", pkg["name"], wrongURL, pkg["url"]))
 						print("The warning will be ignored (--force). This may result in an outdated package and build conflicts!")
-					
+
 					else:
 						text = textRemoteConflictUF.format("ERROR", pkg["name"], wrongURL, pkg["url"]) + "\n" + textRemoteConflictOptionsUF.format(pkg["url"], pkgPath)
 						if dryRun:
@@ -993,7 +1005,7 @@ def CallGitOnPackages(args, gitCommand):
 
 
 def GenerateProjectFiles(args):
-	
+
 	options			= []
 
 	for i in range(len(args)):
@@ -1035,12 +1047,9 @@ def RunUGHub(args):
 
 		if cmd == "addsource":
 			AddSource(args[1:])
-   
+
 		elif cmd == "removesource":
 			RemoveSource(args[1:])
-    
-		elif cmd == "purgesource":
-			PurgeSource(args[1:])
 
 		elif cmd == "help":
 			print("")
