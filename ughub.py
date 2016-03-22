@@ -179,8 +179,7 @@ def PurgeSource(*sources):
 	"""
 	Purges the sources from the filesystem.
 	Supply a list and unpack with the splat operator or provide varargs the regular way.
-	:return:
-    :param sources:
+    :param sources: the sources to be purged
     :return:
     """
 	if (len(sources) == 0): return
