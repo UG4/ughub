@@ -54,8 +54,14 @@ content = {
 
 		 {
             "name": "uninstall",
-            "usage": "uninstall NAME",
-            "description": "Uninstall a given package from the filesystem\n"
+			 "usage": "uninstall PACKAGE_1 [PACKAGE_2 [PACKAGE_3 [...]]] [OPTIONS]",
+			 "description":	"Uninstalls the specified packages and removes their contents from the file system\n",
+			 "options": [
+				 {
+					 "name": "-f [--force]",
+					 "description":	"Force uninstall of a given package from filesystem even if local changes exist"
+				 }
+			 ]
         },
 
 		{

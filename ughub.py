@@ -503,6 +503,11 @@ def PrintPackageInfo(args):
 
 
 def GetPackageDir(pkg):
+	"""
+	Return the path to a given package
+	:param pkg:
+	:return: str
+	"""
 	return os.path.join(GetRootDirectory(), pkg["prefix"], pkg["name"])
 
 
@@ -833,6 +838,8 @@ def UninstallPackage(args):
 	"""
 	packageNames = args
 
+	force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+
 	for i in range(len(args)):
 		if args[i][0] == "-":
 			packageNames = args[0:i]
@@ -847,42 +854,51 @@ def UninstallPackage(args):
 		for p in all_packages:
 			if p["name"] == package:
 				print(p["prefix"])
-				if PackageIsInstalled(p) and CheckPackageBeforeUninstall(p):
+				if PackageIsInstalled(p) and CheckDirForLocalChanges(GetPackageDir(p)):
 					import shutil
-					shutil.rmtree(os.path.join(GetRootDirectory(), os.path.join(p["prefix"], p["name"])))
+					shutil.rmtree(GetPackageDir(p))
 
 
-def CheckPackageBeforeUninstall(package):
+def CheckDirForLocalChanges(path):
 	"""
-	Checks if a package can be removed safely
-	:param package: the package
-	:return: True if package can be removed safely otherwise False
+	Check if a given path respectively directory contains local changes
+	:param path: a filesystem path (usually a path to a package or source, i. e. a git repository)
+	:return: True if local changes exist in path respectively directory and False otherwise
 	"""
+
+	# not a git repository
+	p = subprocess.Popen("git status".split(), cwd=path, stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8");
+	if p.returncode != 0:
+		for line in gitLog.splitLines():
+			if re.match("^Fatal.*", line):
+				return True
+
 	# repository has upstream origin
-	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), "",), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	p = subprocess.Popen("git remote -v".split(), cwd=path, stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
 		for line in gitLog.splitlines():
 			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
 			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
 			if not (m1 and m2):
-				return False
+				return True
 
 	# repository has no (local) changes
-	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd=path, stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
 		if not len(gitLog.splitLines()) == 0:
-			return False
+			return True
 
 	# repository has no unpushed (local) commits
-	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(GetRootDirectory(), ""), os.path.join(package["prefix"],package["name"])), stdout=subprocess.PIPE)
+	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd=path, stdout=subprocess.PIPE)
 	gitLog = p.communicate()[0].decode("utf-8")
 	if p.returncode != 0:
 		if not len(gitLog.splitlines()) == 0:
-			return False
+			return True
 
-	return True
+	return False
 
 
 def InstallAllPackages(args):
