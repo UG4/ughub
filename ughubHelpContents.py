@@ -59,11 +59,21 @@ content = {
 			"options": [
 				{
 					"name": "-f [--force]",
-					"description":	"Purge the source from the filesystem even if there are uncommited changes or unpushed changes or no remote origin exists for this repository"
+	   			    "description":	"Force removal of a given source from filesystem even if local changes exist"
 				}
       ]
 		},
-
+		 {
+            "name": "uninstall",
+			 "usage": "uninstall PACKAGE_1 [PACKAGE_2 [PACKAGE_3 [...]]] [OPTIONS]",
+			 "description":	"Uninstalls the specified packages and removes their contents from the file system\n",
+			 "options": [
+				 {
+					 "name": "-f [--force]",
+					 "description":	"Force uninstall of a given package from filesystem even if local changes exist"
+				 }
+			 ]
+        },
 		{
 			"name": "genprojectfiles",
 			"usage": "genprojectfiles TARGET [OPTIONS]",

@@ -193,8 +193,9 @@ def PurgeSource(*sources):
 
 def RemoveSource(args):
 	"""
-	Removes the specified sources from the internal sources list
-	:param args: command line arguments - the sources' names
+	Removes the specified source from the internal sources list and purges it if no local change exists.
+	Otherwise use --force / -f option to override this safety check.
+	:param args: command line arguments, options and the source to be removed
 	:return:
 	"""
 	if (len(args) < 1 or args[0][0] == "-"):
@@ -218,7 +219,7 @@ def RemoveSource(args):
 		PrintSource(source)
 		sources.remove(source)
 		WriteSources(sources)
-		if (CheckSourceBeforeRemoval(name) or force):
+		if (CheckDirForLocalChanges(os.path.join(GetRootDirectory(), os.path.join("sources", name))) or force):
 			PurgeSource(name)
 		else:
 			print("The following source '%s' has either no remote origin, uncommited (local) changes or unpushed "
@@ -555,6 +556,11 @@ def PrintPackageInfo(args):
 
 
 def GetPackageDir(pkg):
+	"""
+	Return the path to a given package
+	:param pkg:
+	:return: str
+	"""
 	return os.path.join(GetRootDirectory(), pkg["prefix"], pkg["name"])
 
 
@@ -619,40 +625,6 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 							  "  and make sure that they are all up to date (use 'ughub updatesources')."
 							  .format(packageName))
 	return packagesOut
-
-
-def CheckSourceBeforeRemoval(source, origin = "origin"):
-	"""
-	Checks if a source can safely be removed and indicates this by return value
-	:param source: the source
-	:param origin: the remote origin
-	:return: True if source repository may be removed harmlessly otherwise False
-	"""
-	# repository has upstream origin
-	p = subprocess.Popen("git remote -v".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
-	gitLog = p.communicate()[0].decode("utf-8")
-	if p.returncode != 0:
-		for line in gitLog.splitlines():
-			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
-			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
-			if not (m1 and m2):
-				return False
-
-	# repository has no (local) changes
-	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
-	gitLog = p.communicate()[0].decode("utf-8")
-	if p.returncode != 0:
-		if not len(gitLog.splitLines()) == 0:
-			return False
-
-	# repository has no unpushed (local) commits
-	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd = os.path.join(os.path.join(".ughub", "sources"), source), stdout=subprocess.PIPE)
-	gitLog = p.communicate()[0].decode("utf-8")
-	if p.returncode != 0:
-		if not len(gitLog.splitlines()) == 0:
-			return False
-
-	return True
 
 
 #	Returns the fetch and pull urls of the git repository of the specified package as strings.
@@ -812,11 +784,11 @@ def InstallPackage(args):
 						print(textBranchConflictUF.format("NOTE", pkg["name"], curBranch, pkg["__BRANCH"]))
 						print("The required branch will be automatically checked out (--resolve)")
 						if not dryRun:
-					 		proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
-					 		if proc.wait() != 0:
-					 			raise TransactionError("Trying to resolve branch conflict but couldn't check "
-					 								   "out branch '{0}' of package '{1}' at '{2}'"
-					 								   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
+							proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
+							if proc.wait() != 0:
+								raise TransactionError("Trying to resolve branch conflict but couldn't check "
+													   "out branch '{0}' of package '{1}' at '{2}'"
+													   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
 					elif force:
 						print(textBranchConflictUF.format("WARNING", pkg["name"], curBranch, pkg["__BRANCH"]))
 						print("The warning will be ignored (--force). This may result in build problems!")
@@ -902,13 +874,85 @@ def InstallPackage(args):
 
 		else:
 			raise InvalidPackageError("Unsupported repository type of package '{0}': '{1}'"
-							   		  .format(pkg["name"], pkg["repoType"]))
+									  .format(pkg["name"], pkg["repoType"]))
 
 	if dryRun:
 		print("Dry run. Nothing was installed/updated.")
 		if problemsOccurred:
 			print("WARNING: problems were detected during dry installation run. See above.")
 		return
+
+
+def UninstallPackage(args):
+	"""
+	Uninstalls a package
+	:param args: the packages to be removed
+	:return:
+	"""
+	packageNames = args
+
+	force = ughubUtil.HasCommandlineOption(args, ("-f", "--force"))
+
+	for i in range(len(args)):
+		if args[i][0] == "-":
+			packageNames = args[0:i]
+			break
+
+	if len(packageNames) == 0:
+		print("Please specify a package name. See 'ughub help uninstall'.")
+		return
+
+	all_packages = LoadPackageDescs()
+	for package in packageNames:
+		for p in all_packages:
+			if p["name"] == package:
+				print(p["prefix"])
+				if PackageIsInstalled(p) and CheckDirForLocalChanges(GetPackageDir(p)):
+					import shutil
+					shutil.rmtree(GetPackageDir(p))
+
+
+def CheckDirForLocalChanges(path):
+	"""
+	Check if a given path respectively directory contains local changes
+	:param path: a filesystem path (usually a path to a package or source, i. e. a git repository)
+	:return: True if local changes exist in path respectively directory and False otherwise
+	"""
+
+	# not a git repository
+	p = subprocess.Popen("git status".split(), cwd=path, stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8");
+	if p.returncode != 0:
+		for line in gitLog.splitLines():
+			if re.match("^Fatal.*", line):
+				return True
+
+	# repository has upstream origin
+	p = subprocess.Popen("git remote -v".split(), cwd=path, stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		for line in gitLog.splitlines():
+			m1 = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
+			m2 = re.match("^origin\s+(.+?)\s+\(push\)$", line)
+			if not (m1 and m2):
+				return True
+
+	# repository has no (local) changes
+	p = subprocess.Popen("git diff-index --quiet HEAD --".split(), cwd=path, stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitLines()) == 0:
+			return True
+
+	# repository has no unpushed (local) commits
+	p = subprocess.Popen("git diff origin/master..HEAD -- ".split(), cwd=path, stdout=subprocess.PIPE)
+	gitLog = p.communicate()[0].decode("utf-8")
+	if p.returncode != 0:
+		if not len(gitLog.splitlines()) == 0:
+			return True
+
+	return False
+
 
 def InstallAllPackages(args):
 	source		= ughubUtil.GetCommandlineOptionValue(args, ("-s", "--source"))
@@ -929,6 +973,7 @@ def InstallAllPackages(args):
 
 def PackageIsInstalled(pkg):
 	return os.path.isdir(GetPackageDir(pkg))
+
 
 def CallGitOnPackage(pkg, gitCommand, args):
 #todo:	check for changes first for 'commit' and 'push', using e.g.
@@ -1054,6 +1099,9 @@ def RunUGHub(args):
 
 		elif cmd == "removesource":
 			RemoveSource(args[1:])
+
+		elif cmd == "uninstall":
+			UninstallPackage(args[1:])
 
 		elif cmd == "help":
 			print("")
