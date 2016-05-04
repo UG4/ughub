@@ -177,10 +177,12 @@ content = {
 			"name": "install",
 			"usage": "install PACKAGE_1 [PACKAGE_2 [PACKAGE_3 [...]]] [OPTIONS]",
 			"description":	"Installs/updates the specified PACKAGES\n"
-							"Dependend packages will also be automatically installed/updated.\n"
+							"Dependend packages will also be automatically installed/updated unless\n"
+							"the options '--nodeps' or '--noupdate' are specified.\n"
+							"\n"
 							"If an affected package exists already and if the requested branch\n"
 							"does not match the current branch of that package, an error is raised\n"
-							"unless the --force or --resolve option is specified. The first will\n"
+							"unless the --ignore or --resolve option is specified. The first will\n"
 							"keep the old branch/repository while the second one will automatically\n"
 							"perform a checkout of the newly requested branch/repository.",
 			"options": [
@@ -196,11 +198,22 @@ content = {
 									"installing any files."
 				},
 				{
-					"name": "-f [--force]",
-					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs\n"
-									"the requested installation/update without changing any branches\n"
-									"or repositories. Please note that this may lead to build-problems\n"
-									"later on. Only use if you know what you are doing."
+					"name": "-i [--ignore]",
+					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
+									"installation/update without changing any conflicting branches or repositories.\n"
+									"Please note that this may lead to build-problems later on."
+				},
+				{
+					"name": "--nodeps",
+					"description":	"Won't install or update packages on which the installed one depends.\n"
+									"Useful if one only wants to inspect a specific package.\n"
+									"Please note that this may lead to build-problems later on."
+				},
+				{
+					"name": "--noupdate",
+					"description":	"Disables autmatic updates of installed packages which are\n"
+									"contained in the dependency list of the installed package.\n"
+									"Please note that this may lead to build-problems later on."
 				},
 				{
 					"name": "-r [--resolve] ARG",
@@ -218,17 +231,21 @@ content = {
 		{
 			"name": "installall",
 			"usage": "installall [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
-			"description":	"Installs/updates all packages (for detailed package list run 'ughub list')\n"
-							"Installs all available packages as listed in the current package list.\n"
+			"description":	"Installs all available packages as listed by the correponding call to 'ughub list'\n"
+							"plus packages which are contained in the dependecy lists of considered packages\n"
+							"(unless the --nodeps option is specified). Considered packages which already are\n"
+							"installed are updated automatically (unless the --noupdate option is specified).\n"
+							"\n"
 							"Through CATEGORY_1,...,CATEGORY_N one can limit the list of packages that\n"
 						   	"will be installed/updated to packages which belong to at least one of those categories.\n"
 							"Using --matchall, --installed, --notinstalled further limits the list of\n"
-							"installed/updated packages accordingly.\n"
-							"If an affected package exists already and if the requested branch or repository\n"
+							"considered packages accordingly.\n"
+							"\n"
+							"If an affected package exists already and if the requested branch\n"
 							"does not match the current branch of that package, an error is raised\n"
-							"unless the --force or --resolve option is specified. The first will keep the old\n"
-							"branch/repository while the second one will automatically perform a checkout of\n"
-							"the newly requested branch/repository.",
+							"unless the --ignore or --resolve option is specified. The first will\n"
+							"keep the old branch/repository while the second one will automatically\n"
+							"perform a checkout of the newly requested branch/repository.",
 			"options": [
 				{
 					"name": "-a [--matchall]",
@@ -245,10 +262,22 @@ content = {
 									"installing any files."
 				},
 				{
-					"name": "-f [--force]",
+					"name": "-i [--ignore]",
 					"description":	"Ignores conflicts (e.g. branch or remote conflicts) and performs the requested\n"
-									"installation without changing any branches or repositories. Please note that\n"
-									"this may lead to build-problems later on. Only use if you know what you are doing."
+									"installation/update without changing any conflicting branches or repositories.\n"
+									"Please note that this may lead to build-problems later on."
+				},
+				{
+					"name": "--nodeps",
+					"description":	"Won't install or update packages on which the installed one depends.\n"
+									"Useful if one only wants to inspect a specific package.\n"
+									"Please note that this may lead to build-problems later on."
+				},
+				{
+					"name": "--noupdate",
+					"description":	"Disables autmatic updates of installed packages which are\n"
+									"contained in the dependency list of the installed package.\n"
+									"Please note that this may lead to build-problems later on."
 				},
 				{
 					"name": "-i [--installed]",

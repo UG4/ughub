@@ -509,7 +509,8 @@ def GetPackageDir(pkg):
 # returns a list of package descriptors that have to be installed for a given package.
 # note that this list may contain packages that are already installed.
 def BuildPackageDependencyList(packageName, availablePackages, source=None,
-							   branch=None, processedPackageBranchPairs=[]):
+							   branch=None, processedPackageBranchPairs=[],
+							   nodeps = False):
 	packagesOut = []
 
 	gotOne = False
@@ -532,7 +533,7 @@ def BuildPackageDependencyList(packageName, availablePackages, source=None,
 				packagesOut.append(pkg)
 				processedPackageBranchPairs.append(PackageBranchPair(packageName, useBranch))
 
-				if "dependencies" in pkg:
+				if not nodeps and "dependencies" in pkg:
 					dependsOn = None
 					deps = pkg["dependencies"]
 					for dep in deps:
@@ -610,11 +611,13 @@ def InstallPackage(args):
 		print("Please specify a package name. See 'ughub help install'.")
 		return
 
-	dryRun	= ughubUtil.HasCommandlineOption(options, ("-d", "--dry"))
-	force	= ughubUtil.HasCommandlineOption(options, ("-f", "--force"))
-	resolve	= ughubUtil.HasCommandlineOption(options, ("-r", "--resolve"))
-	branch	= ughubUtil.GetCommandlineOptionValue(options, ("-b", "--branch"))
-	source	= ughubUtil.GetCommandlineOptionValue(options, ("-s", "--source"))
+	dryRun		= ughubUtil.HasCommandlineOption(options, ("-d", "--dry"))
+	ignore		= ughubUtil.HasCommandlineOption(options, ("-i", "--ignore"))
+	resolve		= ughubUtil.HasCommandlineOption(options, ("-r", "--resolve"))
+	noupdate	= ughubUtil.HasCommandlineOption(options, ("--noupdate",))
+	nodeps		= ughubUtil.HasCommandlineOption(options, ("--nodeps",))
+	branch		= ughubUtil.GetCommandlineOptionValue(options, ("-b", "--branch"))
+	source		= ughubUtil.GetCommandlineOptionValue(options, ("-s", "--source"))
 	packages	= LoadPackageDescs()
 	rootDir		= GetRootDirectory()
 
@@ -622,7 +625,11 @@ def InstallPackage(args):
 	processedPackageBranchPairs = []
 
 	for packageName in packageNames:
-		requiredPackages = requiredPackages + BuildPackageDependencyList(packageName, packages, source, branch, processedPackageBranchPairs)
+		requiredPackages = (requiredPackages +
+							BuildPackageDependencyList(packageName, packages,
+													   source, branch,
+									   				   processedPackageBranchPairs,
+									   				   nodeps))
 
 	print("List of required packages:")
 
@@ -641,13 +648,13 @@ def InstallPackage(args):
 		"    - manually adjust the url by executing\n"
 		"      'git remote set-url origin {0}'\n"
 		"      at '{1}'\n"
-		"    - call 'ughub install ...' with the '--force' option to force installation despite this\n"
+		"    - call 'ughub install ...' with the '--ignore' option to perform installation despite this\n"
 		"      error. This may result in an outdated package and build conflicts!")
 
 	#0: Message, 1: Package name, 2: current branch, 3: required branch
 	textBranchConflictUF = (""
-		"{0}: Current branch '{2}' of installed package '{1}'\n"
-		"  does not correspond to the required branch '{3}'.")
+		"{0}: Current branch '{2}' of installed package '{1}' "
+		"does not correspond to the required branch '{3}'.")
 
 	#0: required branch, 2: package-path
 	textBranchConflictOptionsUF = (""
@@ -655,15 +662,14 @@ def InstallPackage(args):
 		"  - call 'ughub install' with the '--resolve' option to automatically resolve the conflict\n"
 		"    (a checkout of the required branch will be performed).\n"
 		"  - manually check out the required branch by executing\n"
-		"    git checkout {0}\n"
-		"    at '{1}'\n"
-		"  - call 'ughub install' with the '--force' option to ignore the error. This may lead to build problems!\n")
+		"    'git checkout {0}' at '{1}'\n"
+		"  - call 'ughub install' with the '--ignore' option to ignore the error. This may lead to build problems!\n")
 
 	# iterate over all required packages. Check for each whether it already
 	# exists and whether the branch matches.
 	# If it doesn't exist, perform a fresh clone.
 	# If it does exist and branches match, perform a pull.
-	# If it does exist but branches mismatch, perform a pull if --force was specified
+	# If it does exist but branches mismatch, perform a pull if --ignore was specified
 	# and abort with a warning if it wasn't specified.
 
 	firstPkg = True
@@ -690,18 +696,20 @@ def InstallPackage(args):
 					problemsOccurred = True
 					if resolve:
 						print(textRemoteConflictUF.format("NOTE", pkg["name"], wrongURL, pkg["url"]))
-						print("The remote will be automatically adjusted (--resolve)")
+						print("NOTE: The remote will be automatically adjusted (--resolve)")
 						if not dryRun:
 							proc = subprocess.Popen(["git","remote","set-url","origin", pkg["url"]], cwd = pkgPath)
 							if proc.wait() != 0:
 								raise TransactionError("Couldn't set url '{0}' of remote 'origin' for package '{1}' at '{2}'"
 														.format(pkg["url"], pkg["name"], pkgPath))
-					elif force:
+					elif ignore:
 						print(textRemoteConflictUF.format("WARNING", pkg["name"], wrongURL, pkg["url"]))
-						print("The warning will be ignored (--force). This may result in an outdated package and build conflicts!")
+						print("NOTE: The warning will be ignored (--ignore). "
+							  "This may result in an outdated package and build conflicts!")
 					
 					else:
-						text = textRemoteConflictUF.format("ERROR", pkg["name"], wrongURL, pkg["url"]) + "\n" + textRemoteConflictOptionsUF.format(pkg["url"], pkgPath)
+						text = (textRemoteConflictUF.format("ERROR", pkg["name"], wrongURL, pkg["url"]) +
+								"\n" + textRemoteConflictOptionsUF.format(pkg["url"], pkgPath))
 						if dryRun:
 							print(text)
 						else:
@@ -724,68 +732,33 @@ def InstallPackage(args):
 					problemsOccurred = True
 					if resolve:
 						print(textBranchConflictUF.format("NOTE", pkg["name"], curBranch, pkg["__BRANCH"]))
-						print("The required branch will be automatically checked out (--resolve)")
+						print("NOTE: The required branch will be automatically checked out (--resolve)")
 						if not dryRun:
 					 		proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
 					 		if proc.wait() != 0:
 					 			raise TransactionError("Trying to resolve branch conflict but couldn't check "
 					 								   "out branch '{0}' of package '{1}' at '{2}'"
 					 								   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
-					elif force:
+					elif ignore:
 						print(textBranchConflictUF.format("WARNING", pkg["name"], curBranch, pkg["__BRANCH"]))
-						print("The warning will be ignored (--force). This may result in build problems!")
+						print("NOTE: The warning will be ignored (--ignore). This may result in build problems!")
 
 					else:
-						text = textBranchConflictUF.format("ERROR", pkg["name"], curBranch, pkg["__BRANCH"]) + "\n" + textBranchConflictOptionsUF.format(pkg["__BRANCH"], pkgPath)
+						text = (textBranchConflictUF.format("ERROR", pkg["name"], curBranch, pkg["__BRANCH"]) +
+								"\n" + textBranchConflictOptionsUF.format(pkg["__BRANCH"], pkgPath))
 						if dryRun:
 							print(text)
 						else:
 							raise DependencyError(text)
-					# if dryRun:
-					# 	if resolve:
-					# 		print("NOTE: Branch '{0}' of package '{2}' at '{3}'\n"
-					# 			  "      will be replaced by branch '{1}' (--resove)"
-					# 			   .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
-					# 	elif force:
-					# 		print("WARNING: Branch conflict between current branch '{0}' and required\n"
-					# 			  "branch '{1}' of package '{2}' at '{3}' will be ignored (--force)."
-					# 			  .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
-					# 	else:
-					# 		problemsOccurred = True
-					# 		print("ERROR: Current branch '{0}' and required branch '{1}'\n"
-					# 			  "  do not match for package '{2}' at '{3}'.\n"
-					# 			  "  - Call 'ughub install' with the '--resolve' option to force a checkout of the required branch.\n"
-					# 			  "  - Call 'ughub install' with the '--force' option to ignore the error. This may lead to build problems!\n"
-					# 			  .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath)))
-					# else:
-					# 	if resolve:
-					# 		proc = subprocess.Popen(["git", "checkout", pkg["__BRANCH"]], cwd = pkgPath)
-					# 		if proc.wait() != 0:
-					# 			raise TransactionError("Trying to resolve branch conflict but couldn't check "
-					# 								   "out branch '{0}' of package '{1}' at '{2}'"
-					# 								   .format(pkg["__BRANCH"], pkg["name"], pkgPath))
-					# 		print("Resolved branch conflict by switching from branch '{0}'\n"
-					# 			  "to branch '{1}' of package '{2}' at '{3}' (--resolve)"
-					# 			  .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
-					# 	elif force:
-					# 		print("WARNING: Ignoring branch conflict between current branch '{0}'\n"
-					# 			  "and required branch '{1}' of package '{2}' at '{3}' (--force)"
-					# 			  .format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
 
-					# 	else:
-					# 		raise DependencyError(
-					# 				"Current branch '{0}' and required branch '{1}'\n"
-					# 				"  do not match for package '{2}' at '{3}'.\n"
-					# 				"  - Call 'ughub install' with the '--resolve' option to force a checkout of the required branch.\n"
-					# 				"  - Call 'ughub install' with the '--force' option to ignore the error. This may lead to build problems!\n"
-					# 				.format(curBranch, pkg["__BRANCH"], pkg["name"], pkgPath))
-
-
-				if not dryRun:
+				if not (dryRun or noupdate):
 					proc = subprocess.Popen(["git", "pull"], cwd = pkgPath)
 					if proc.wait() != 0:
 						raise TransactionError("Couldn't pull for package '{0}' at '{1}'"
 												.format(pkg["name"], pkgPath))
+				elif noupdate:
+					print("NOTE: Package won't be updated due to 'noupdate' option. "
+						  "This may lead to build conflicts and errors.")
 
 			else:
 			#	the package doesn't exist yet. Make sure that all paths are set up correctly
