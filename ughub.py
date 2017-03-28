@@ -821,7 +821,7 @@ def CallGitOnPackage(pkg, gitCommand, args):
 #todo:	check for changes first for 'commit' and 'push', using e.g.
 #		git status --porcelain
 	print("> {0}".format(GetPackageDir(pkg)))
-	proc = subprocess.Popen(["git", gitCommand] + args, cwd = GetPackageDir(pkg))
+	proc = subprocess.Popen(["git", "--no-pager", gitCommand] + args, cwd = GetPackageDir(pkg))
 	if proc.wait() != 0:
 		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
 							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
@@ -841,12 +841,14 @@ def CallGitOnPackages(args, gitCommand):
 	fails = []
 	firstPackage = True
 
+	specifiedPackages = []
+
 	# get the argument separator "---"
-	gitargs = []
+	gitargs = args
 	for i in range(len(args)):
 		if args[i] == "---":
-			gitargs = args[i+1:]
-			args = args[0:i]
+			gitargs = args[0:i]
+			specifiedPackages = args[i+1:]
 			break
 
 	try:
@@ -854,11 +856,10 @@ def CallGitOnPackages(args, gitCommand):
 	except TransactionError as e:
 		print("WARNING:\n  " + str(e))
 
-	# print("args: {0}, gitargs: {1}".format(args, gitargs))
-	if len(args) > 0:
-		for pname in args:
+	if len(specifiedPackages) > 0:
+		for pname in specifiedPackages:
 			if not firstPackage:
-				print("")
+				print("\n")
 			firstPackage = False
 
 			try:
@@ -871,15 +872,15 @@ def CallGitOnPackages(args, gitCommand):
 				except TransactionError as e:
 					fails.append(str(e))
 
-			except NestedTableEntryNotFoundError:
-				raise fails.append("Unknown package '{0}'".format(pname))
+			except ughubUtil.NestedTableEntryNotFoundError:
+				fails.append("Unknown package '{0}'".format(pname))
 
 	else:
 	#	check for each known package whether it is installed. If this is the case, perform a pull
 		for pkg in packages:
 			if PackageIsInstalled(pkg):
 				if not firstPackage:
-					print("")
+					print("\n")
 				firstPackage = False
 
 				try:
@@ -893,6 +894,23 @@ def CallGitOnPackages(args, gitCommand):
 			msg = msg + "\n  - " + e
 
 		raise TransactionError(msg)
+
+
+def PackageLogs(args):
+	num = "10"
+	newargs = ["---"]
+	ignoreEntries = 0
+	for i in range(len(args)):
+		if ignoreEntries > 0:
+			ignoreEntries = ignoreEntries - 1
+		else:
+			if args[i] == "-n":
+				num = args[i+1]
+				ignoreEntries = 1
+			else:
+				newargs = newargs + [args[i]]
+
+	CallGitOnPackages(["-n", num, "--pretty=format:* %an (%ad | %h)%n  \"%s\""] + newargs, "log")
 
 
 def GenerateProjectFiles(args):
@@ -949,20 +967,23 @@ def RunUGHub(args):
 		elif cmd == "genprojectfiles":
 			GenerateProjectFiles(args[1:])
 
+		elif cmd == "git":
+			CallGitOnPackages(args[2:], args[1])
+
 		elif cmd == "gitadd":
-			CallGitOnPackages(args[1:], "add")
+			raise Exception("gitadd is no longer supported. Please call 'ughub git add' instead.")
 
 		elif cmd == "gitcommit":
-			CallGitOnPackages(args[1:], "commit")
+			raise Exception("gitcommit is no longer supported. Please call 'ughub git commit' instead.")
 
 		elif cmd == "gitpull":
-			CallGitOnPackages(args[1:], "pull")
+			raise Exception("gitpull is no longer supported. Please call 'ughub git pull' instead.")
 
 		elif cmd == "gitpush":
-			CallGitOnPackages(args[1:], "push")
+			raise Exception("gitpush is no longer supported. Please call 'ughub git push' instead.")
 
 		elif cmd == "gitstatus":
-			CallGitOnPackages(args[1:], "status")
+			raise Exception("gitstatus is no longer supported. Please call 'ughub git status' instead.")
 
 		elif cmd == "init":
 			InitializeDirectory(args[1:])
@@ -978,6 +999,9 @@ def RunUGHub(args):
 
 		elif cmd in ["list", "listpackages"]:
 			ListPackages(args[1:])
+
+		elif cmd == "log":
+			PackageLogs(args[1:])
 
 		elif cmd == "repair":
 			Repair(args[1:])

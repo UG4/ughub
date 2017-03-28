@@ -76,65 +76,14 @@ content = {
 		},
 
 		{
-			"name": "gitadd",
-			"usage": "gitadd [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, files specified under GIT_OPTIONS\n"
-							"are added in the local installations of PACKAGE_1,...,PACKAGE_N.\n"
-							"If PACKAGE_1 was not specified, the operation is performed for all\n"
-							"installed packages.\n"
-							"'---' separates arguments to ughub's gitadd command from arguments\n"
-							"that shall be passed to the underlying git-command itself. Please refer\n"
-							"to git's documentation for available parameters."
-		},
-
-		{
-			"name": "gitcommit",
-			"usage": "gitcommit [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes of the working-copies\n"
-							"of the local installations of PACKAGE_1,...,PACKAGE_N are commited.\n"
-							"If PACKAGE_1 was not specified, the operation is performed for all\n"
-							"installed packages.\n"
-							"'---' separates arguments to ughub's gitcommit command from arguments\n"
-							"that shall be passed to the underlying git-command itself. Please refer\n"
-							"to git's documentation for available parameters."
-		},
-
-		{
-			"name": "gitpull",
-			"usage": "gitpull [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the origins\n"
-							"of PACKAGE_1,...,PACKAGE_N are pulled to their local installations.\n"
-							"Note that PACKAGE_1,...,PACKAGE_N has to be installed before one can\n"
-							"pull new changes (see 'ughub help install').\n"
-							"If PACKAGE_1 was not specified, changes from all remote repositories of\n"
-							"all installed packages are pulled.\n"
-							"'---' separates arguments to ughub's gitpull command from arguments\n"
-							"that shall be passed to the underlying git-command itself. Please refer\n"
-							"to git's documentation for available parameters."
-		},
-
-		{
-			"name": "gitpush",
-			"usage": "gitpush [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, changes from the local\n"
-							"installations of PACKAGE_1,...,PACKAGE_N are pushed to their remote repositories.\n"
-							"If PACKAGE_1 was not specified, changes from all installed packages are\n"
-							"pushed to their remote repositories.\n"
-							"'---' separates arguments to ughub's gitpush command from arguments\n"
-							"that shall be passed to the underlying git-command itself. Please refer\n"
-							"to git's documentation for available parameters."
-		},
-
-		{
-			"name": "gitstatus",
-			"usage": "gitstatus [PACKAGE_1 [PACKAGE_2 [...]]] [--- [GIT-OPTIONS]]",
-			"description":	"If PACKAGE_1,...,PACKAGE_N is specified, the git-status messages of\n"
-							"the local installations of PACKAGE_1,...,PACKAGE_N are displayed.\n"
-							"If PACKAGE_1 was not specified, git-status messages of all\n"
-							"installed packages are shown.\n"
-							"'---' separates arguments to ughub's gitstatus command from arguments\n"
-							"that shall be passed to the underlying git-command itself. Please refer\n"
-							"to git's documentation for available parameters."
+			"name": "git",
+			"usage": "git COMMAND [GIT-OPTIONS] [--- [PACKAGE_1 [PACKAGE_2 [...]]]]",
+			"description":	"Executes 'git COMMAND GIT-OPTIONS' on installed packages.\n"
+							"COMMAND has to be a valid git-command. See 'git help' for valid git-commands.\n"
+							"If PACKAGE_1,...,PACKAGE_N is specified after the separator '---' then\n"
+							"'git COMMAND GIT-OPTIONS' will be executed on the specified packages only.\n"
+							"If the separator or PACKAGE_1 was not specified, then the operation\n"
+							"is performed for all installed packages.\n"
 		},
 
 		{
@@ -325,6 +274,21 @@ content = {
 				{
 					"name": "-s [--source] ARG",
 					"description":	"Lists packages from the specified source only."
+				},
+			]
+		},
+
+		{
+			"name": "log",
+			"usage": "log [OPTIONS] [PACKAGE_1 [PACKAGE_2 [...]]]",
+			"description": "Executes 'git log' with a special formatting on the packages\n"
+						   " PACKAGE_1, ..., PACKAGE_N. If no package was specified, then\n"
+						   "'git log' will be executed for all installed packages.",
+			"options": [
+				{
+					"name": "-n ARG",
+					"description":	"Prints only the last 'ARG' log entries for each package.\n"
+									"ARG has to be an integer number greater than 0. Default is 10."
 				},
 			]
 		},
