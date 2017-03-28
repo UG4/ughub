@@ -825,6 +825,7 @@ def CallGitOnPackage(pkg, gitCommand, args):
 	if proc.wait() != 0:
 		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
 							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
+	sys.stderr.flush()
 
 
 def CacheGitPassword():
