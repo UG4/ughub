@@ -821,11 +821,19 @@ def CallGitOnPackage(pkg, gitCommand, args):
 #todo:	check for changes first for 'commit' and 'push', using e.g.
 #		git status --porcelain
 	print("> {0}".format(GetPackageDir(pkg)))
-	proc = subprocess.Popen(["git", "--no-pager", gitCommand] + args, cwd = GetPackageDir(pkg))
-	if proc.wait() != 0:
+
+	proc = subprocess.Popen(["git", "--no-pager", gitCommand] + args, cwd = GetPackageDir(pkg), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	if proc.wait() == 0:
+		print(proc.stdout.read().decode("utf-8"))
+		print(proc.stderr.read().decode("utf-8"))
+	else:
+		if proc.stdout:
+			print(proc.stdout.read().decode("utf-8"))
+		if proc.stderr:
+			print(proc.stderr.read().decode("utf-8"))
+
 		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
 							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
-	sys.stderr.flush()
 
 
 def CacheGitPassword():
@@ -860,7 +868,7 @@ def CallGitOnPackages(args, gitCommand):
 	if len(specifiedPackages) > 0:
 		for pname in specifiedPackages:
 			if not firstPackage:
-				print("\n")
+				print("")
 			firstPackage = False
 
 			try:
@@ -881,7 +889,7 @@ def CallGitOnPackages(args, gitCommand):
 		for pkg in packages:
 			if PackageIsInstalled(pkg):
 				if not firstPackage:
-					print("\n")
+					print("")
 				firstPackage = False
 
 				try:
