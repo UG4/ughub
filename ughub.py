@@ -824,13 +824,13 @@ def CallGitOnPackage(pkg, gitCommand, args):
 
 	proc = subprocess.Popen(["git", "--no-pager", gitCommand] + args, cwd = GetPackageDir(pkg), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	if proc.wait() == 0:
-		print(proc.stdout.read().decode("utf-8"))
-		print(proc.stderr.read().decode("utf-8"))
+		print(proc.stdout.read().decode(sys.stdout.encoding, "ignore"))
+		print(proc.stderr.read().decode(sys.stdout.encoding, "ignore"))
 	else:
 		if proc.stdout:
-			print(proc.stdout.read().decode("utf-8"))
+			print(proc.stdout.read().decode(sys.stdout.encoding, "ignore"))
 		if proc.stderr:
-			print(proc.stderr.read().decode("utf-8"))
+			print(proc.stderr.read().decode(sys.stdout.encoding, "ignore"))
 
 		raise TransactionError("Couldn't perform 'git {0}' for package '{1}' at '{2}'"
 							   .format(gitCommand, pkg["name"], GetPackageDir(pkg)))
