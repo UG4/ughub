@@ -731,6 +731,7 @@ def InstallPackage(args):
 				if curBranch != pkg["__BRANCH"]:
 					problemsOccurred = True
 					if resolve:
+					#todo: call git-fetch, or else checkout may fail or may be outdated.
 						print(textBranchConflictUF.format("NOTE", pkg["name"], curBranch, pkg["__BRANCH"]))
 						print("NOTE: The required branch will be automatically checked out (--resolve)")
 						if not dryRun:
@@ -752,6 +753,7 @@ def InstallPackage(args):
 							raise DependencyError(text)
 
 				if not (dryRun or noupdate):
+				# todo: only perform pull if not in detached head state
 					proc = subprocess.Popen(["git", "pull"], cwd = pkgPath)
 					if proc.wait() != 0:
 						raise TransactionError("Couldn't pull for package '{0}' at '{1}'"
