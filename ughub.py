@@ -949,6 +949,45 @@ def GenerateProjectFiles(args):
 	else:
 		ughubProjectFileGenerator.Run(GetRootDirectory(), args[0], name, overwriteFiles)
 
+def GetAutoCompletions(args):
+
+	if len(args) >= 1 and args[0] == "install":
+		try:
+			packages = LoadPackageDescs()
+		except:
+			return
+		result = "-b --branch -d --dry -i --ignore --nodeps --noupdate -r --resolve -s --source "
+		for p in packages:
+			result += p["name"] + " "
+		print(result)
+		return
+
+	if len(args) >= 1 and args[0] == "log":
+		try:
+			packages = LoadPackageDescs()
+		except:
+			return
+		result = "\-n "
+		for p in packages:
+			if PackageIsInstalled(p):
+				result += p["name"] + " "
+		print(result)
+		return
+
+	if len(args) >= 1 and args[0] == "list":
+		print("-a --matchall -i --install -n --notinstalled -s --source")
+		return
+
+	if len(args) == 1:
+		print("addsource help genprojectfiles git init install installall packageinfo list log repair updatesources version")
+		return 
+
+	if len(args) == 2 and args[0] == "help":
+		print("addsource help genprojectfiles git init install installall packageinfo list log repair updatesources version")
+		return
+					
+	
+
 
 def RunUGHub(args):
 
@@ -1030,6 +1069,9 @@ def RunUGHub(args):
 			print("ughub, version {}".format(g_ughubVersionString))
 			print("Copyright 2015 G-CSC, Goethe University Frankfurt")
 			print("All rights reserved")
+		
+		elif cmd == "get-completions":
+			GetAutoCompletions(args[2:])
 
 		else:
 			print("Unknown command: '{0}'".format(cmd))

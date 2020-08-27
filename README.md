@@ -84,6 +84,12 @@ If you choose to edit your PATH variable, please make sure to reload your .bash_
 
     source $HOME/.bash_profile
 
+If you are interested in using auto-completion while using ughub, add the following additional line to your $HOME/.bash_profile or $HOME/.bashrc file
+
+    source $HOME/ughub-completion.bash
+
+and reload the file. Alternatively, you can copy this file ($HOME/ughub-completion.bash) to /etc/bash_completion.d/.
+
 ## Installing ughub (Windows)
 ughub should run out of the box on Windows too. However, in order to execute it from any path, you should add
 
