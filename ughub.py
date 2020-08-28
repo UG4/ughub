@@ -985,8 +985,20 @@ def GetAutoCompletions(args):
 	if len(args) == 2 and args[0] == "help":
 		print("addsource help genprojectfiles git init install installall packageinfo list log repair updatesources version")
 		return
-					
-	
+
+def PrintPackageNames(args):
+	try:
+		packages = LoadPackageDescs()
+	except:
+		return
+		
+	if len(args) > 0 and args[0] == "installed":
+		for p in packages:
+			if PackageIsInstalled(p):
+				print(p["name"])
+	else:
+		for p in packages:
+			print(p["name"])
 
 
 def RunUGHub(args):
@@ -1072,6 +1084,9 @@ def RunUGHub(args):
 		
 		elif cmd == "get-completions":
 			GetAutoCompletions(args[2:])
+		
+		elif cmd == "get-packagenames":
+			PrintPackageNames(args[1:])
 
 		else:
 			print("Unknown command: '{0}'".format(cmd))
