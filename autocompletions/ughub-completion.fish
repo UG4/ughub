@@ -21,5 +21,9 @@ complete -f -c ughub -n "not __fish_seen_subcommand_from $ughub_commands" -a rep
 complete -f -c ughub -n "not __fish_seen_subcommand_from $ughub_commands" -a updatesources -d 'Reloads the lists of available packages from the sources'
 complete -f -c ughub -n "not __fish_seen_subcommand_from $ughub_commands" -a version -d 'Prints version information'
 
-complete -f -c ughub -n "__fish_seen_subcommand_from install" -a "(__fish_ughub_packages)"
-complete -f -c ughub -n "__fish_seen_subcommand_from log" -a "(__fish_ughub_installed_packages)"
+
+complete -f -c ughub -n "__fish_seen_subcommand_from list" -a "-a --matchall -i --installed -n --notinstalled -s --source"
+complete -f -c ughub -n "__fish_seen_subcommand_from help" -a "$ughub_commands"
+complete -f -c ughub -n "__fish_seen_subcommand_from install" -a "(__fish_ughub_packages) -b --branch -d --dry -i --ignore --nodeps --noupdate -r --resolve -s --source"
+complete -f -c ughub -n "__fish_seen_subcommand_from installall" -a "-b --branch -d --dry -i --ignore --nodeps --noupdate --notinstalled --installled -r --resolve -s --source"
+complete -f -c ughub -n "__fish_seen_subcommand_from log" -a "(__fish_ughub_installed_packages) -n"

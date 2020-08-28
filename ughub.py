@@ -962,6 +962,11 @@ def GetAutoCompletions(args):
 		print(result)
 		return
 
+	if len(args) >= 1 and args[0] == "installall":
+		result = "-b --branch -d --dry -i --ignore --nodeps --installed --notinstalled --noupdate -r --resolve -s --source "
+		print(result)
+		return
+
 	if len(args) >= 1 and args[0] == "log":
 		try:
 			packages = LoadPackageDescs()
@@ -975,7 +980,7 @@ def GetAutoCompletions(args):
 		return
 
 	if len(args) >= 1 and args[0] == "list":
-		print("-a --matchall -i --install -n --notinstalled -s --source")
+		print("-a --matchall -i --installed -n --notinstalled -s --source")
 		return
 
 	if len(args) == 1:
