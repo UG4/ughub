@@ -993,12 +993,19 @@ def PrintPackageNames(args):
 		return
 		
 	if len(args) > 0 and args[0] == "installed":
-		for p in packages:
-			if PackageIsInstalled(p):
-				print(p["name"])
+		for i in range(len(packages)):
+			if PackageIsInstalled(packages[i]):
+				if i == len(packages)-1:
+					print(packages[i]["name"], end="")
+				else:
+					print(packages[i]["name"])
+
 	else:
-		for p in packages:
-			print(p["name"])
+		for i in range(len(packages)):
+			if i == len(packages)-1:
+				print(packages[i]["name"], end="")
+			else:
+				print(packages[i]["name"])
 
 
 def RunUGHub(args):
