@@ -968,7 +968,7 @@ def GetAutoCompletions(args):
 		result += "\n"
 		for p in packages:
 			result += p["name"] + "\n"
-		print(result, end="")
+		print(result[:-1], end="")
 		return
 
 	if len(args) >= 1 and args[0] == "log":
@@ -981,7 +981,7 @@ def GetAutoCompletions(args):
 		for p in packages:
 			if PackageIsInstalled(p):
 				result += p["name"] + "\n"
-		print(result, end="")
+		print(result[:-1], end="")	
 		return
 
 	if len(args) >= 1 and args[0] == "help":
