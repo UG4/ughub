@@ -37,6 +37,7 @@ content = {
 						   "URL. The source may later be referenced by NAME in other commands.\n"
 						   "Valid repositories have to contain a 'package.json' file.\n"
 						   "The specified URL has to be a valid git-url.",
+			"shortdescription": "Adds a ughub package source.",
 			"options": [
 				{
 					"name": "-b [--branch] ARG",
@@ -59,6 +60,7 @@ content = {
 							"NAME specifies the name of the root project.\n"
 							"Possible TARGET's:\n"
 							"  eclipse\n",
+			"shortdescription": "Generates project files for UG for different targets.",
 			"options": [
 				{
 					"name": "-n [--name] ARG",
@@ -83,12 +85,13 @@ content = {
 							"If PACKAGE_1,...,PACKAGE_N is specified after the separator '---' then\n"
 							"'git COMMAND GIT-OPTIONS' will be executed on the specified packages only.\n"
 							"If the separator or PACKAGE_1 was not specified, then the operation\n"
-							"is performed for all installed packages.\n"
+							"is performed for all installed packages.\n",
+			"shortdescription": "Allows executing git commands on installed packages."
 		},
 
 		{
 			"name": "help",
-			"usage": "help [COMMAND]",
+			"usage": "help [--commands | COMMAND [OPTIONS] ]",
 			"description": "Call help with one of the COMMANDs listed below to get help for that COMMAND.\n\n"
 						   "'ughub' is a program to automatically download and install packages for\n"
 						   "the UG4 simulation environment. It gathers package information like names,\n"
@@ -100,7 +103,18 @@ content = {
 						   "parent directory in which 'ughub init' was performed.\n"
 						   "After initializing a directory one typically starts with installing a package\n"
 						   "of interest by calling 'ughub install PACKAGE_NAME'. A list of all available\n"
-						   "packages is displayed by the command 'ughub listpackages'.\n"
+						   "packages is displayed by the command 'ughub listpackages'.\n",
+			"shortdescription": "Prints help about ughub commands",
+			"options": [
+				{
+					"name": "--commands",
+					"description":	"Prints all available commands, separated by a space."
+				},
+				{
+					"name": "--shortdescription",
+					"description":	"Only prints a short description of the command."
+				},
+			]
 		},
 
 		{
@@ -112,6 +126,7 @@ content = {
 						   "where the initialization shall be performed.\n"
 						   "PATH may either be a relative path or an absolute path. If PATH is omitted,\n"
 						   "initialization is performed in the current directory.",
+			"shortdescription": "Initializes a path for usage with ughub.",
 			"options": [
 				{
 					"name": "-f [--force]",
@@ -134,6 +149,7 @@ content = {
 							"unless the --ignore or --resolve option is specified. The first will\n"
 							"keep the old branch/repository while the second one will automatically\n"
 							"perform a checkout of the newly requested branch/repository.",
+			"shortdescription": "Installs or updates the specified packages.",
 			"options": [
 				{
 					"name": "-b [--branch] ARG",
@@ -195,6 +211,7 @@ content = {
 							"unless the --ignore or --resolve option is specified. The first will\n"
 							"keep the old branch/repository while the second one will automatically\n"
 							"perform a checkout of the newly requested branch/repository.",
+			"shortdescription": "Installs/updates all available packages.",
 			"options": [
 				{
 					"name": "-a [--matchall]",
@@ -255,10 +272,15 @@ content = {
 			"usage": "list [CATEGORY_1 [CATEGORY_2 [...]]] [OPTIONS]",
 			"description": "Lists all available packages. Through CATEGORY_1,...,CATEGORY_N one\n"
 						   "can limit the output to packages which belong to those categories.",
+			"shortdescription": "Lists available/installed packages.",
 			"options": [
 				{
 					"name": "-a [--matchall]",
 					"description":	"Only packages which match all specified categories are listed."
+				},
+				{
+					"name": "--namesonly",
+					"description":	"Only print package names, space separated."
 				},
 
 				{
@@ -284,6 +306,7 @@ content = {
 			"description": "Executes 'git log' with a special formatting on the packages\n"
 						   " PACKAGE_1, ..., PACKAGE_N. If no package was specified, then\n"
 						   "'git log' will be executed for all installed packages.",
+			"shortdescription": "View the git log of installed, specified packages.",
 			"options": [
 				{
 					"name": "-n ARG",
@@ -296,12 +319,14 @@ content = {
 		{
 			"name": "listsources",
 			"usage": "listsources",
+			"shortdescription": "Lists available sources.",
 			"description": "Lists all available sources ordered from low rank (top) to high rank (bottom)."
 		},
 
 		{
 			"name": "packageinfo",
 			"usage": "packageinfo NAME [OPTIONS]",
+			"shortdescription": "Lists information of all packages with the given name.",
 			"description": "Lists detailed information of all available packages with the given NAME.",
 			"options": [
 				{
@@ -328,6 +353,7 @@ content = {
 		{
 			"name": "repair",
 			"usage": "repair",
+			"shortdescription": "Attempts to repair a broken ughub directory.",
 			"description":	"Attempts to repair a broken ughub directory by performing\n"
 							"the following:\n"
 							"- Generating a 'CMakeLists.txt' file in ughub's root directory.\n"
@@ -335,14 +361,24 @@ content = {
 		},
 
 		{
+			"name": "get-completions",
+			"usage": "ughub get-completions TYPEDSTRING",
+			"shortdescription": "Returns auto complete suggestions.",
+			"description":	"Returns auto complete suggestions based on TYPEDSTRING, the symbols the user typed until now.\n"
+							"This uses information such as available commands, installed packages, usable options..."
+		},
+
+		{
 			"name": "updatesources",
 			"usage": "updatesources",
+			"shortdescription": "Updates package information for all sources.",
 			"description":	"Pulls package information for all sources from their remote repositories."
 		},
 
 		{
 			"name": "version",
 			"usage": "version",
+			"shortdescription": "Prints the version number of ughub.",
 			"description": "Prints the version number of ughub."
 		},
 

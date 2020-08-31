@@ -445,14 +445,22 @@ def ListPackages(args):
 		for pkg in packages:
 			packageDict[pkg["name"]] = packageDict.get(pkg["name"], []) + [pkg]
 
-		print("{0:24.4}  {1:10} {2:11} {3:}"
-				.format("NAME", "PREFIX", "SOURCE", "URL"))
+		namesonly = ughubUtil.HasCommandlineOption(args, ("--namesonly",))
 
-		for key in sorted(packageDict.keys()):
-			pkgs = packageDict[key]
-			for pkg in pkgs:
-				print("{0:24}  {1:10} {2:11} {3:}"
-					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
+		if namesonly:
+			for key in sorted(packageDict.keys()):
+				pkgs = packageDict[key]
+				for pkg in pkgs:
+					print(pkg["name"], end=" ")
+		else:
+			print("{0:24.4}  {1:10} {2:11} {3:}"
+					.format("NAME", "PREFIX", "SOURCE", "URL"))
+
+			for key in sorted(packageDict.keys()):
+				pkgs = packageDict[key]
+				for pkg in pkgs:
+					print("{0:24}  {1:10} {2:11} {3:}"
+						.format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
 		raise InvalidPackageError(e)
@@ -956,15 +964,11 @@ def GetAutoCompletions(args):
 			packages = LoadPackageDescs()
 		except:
 			return
-		result = "-b --branch -d --dry -i --ignore --nodeps --noupdate -r --resolve -s --source "
+		result = ughubHelp.GetOptionStringsForCommand("install")
+		result += "\n"
 		for p in packages:
-			result += p["name"] + " "
-		print(result)
-		return
-
-	if len(args) >= 1 and args[0] == "installall":
-		result = "-b --branch -d --dry -i --ignore --nodeps --installed --notinstalled --noupdate -r --resolve -s --source "
-		print(result)
+			result += p["name"] + "\n"
+		print(result, end="")
 		return
 
 	if len(args) >= 1 and args[0] == "log":
@@ -972,47 +976,28 @@ def GetAutoCompletions(args):
 			packages = LoadPackageDescs()
 		except:
 			return
-		result = "\-n "
+		result = ughubHelp.GetOptionStringsForCommand("log")
+		result += "\n"
 		for p in packages:
 			if PackageIsInstalled(p):
-				result += p["name"] + " "
-		print(result)
+				result += p["name"] + "\n"
+		print(result, end="")
 		return
 
-	if len(args) >= 1 and args[0] == "list":
-		print("-a --matchall -i --installed -n --notinstalled -s --source")
+	if len(args) >= 1 and args[0] == "help":
+		ughubHelp.PrintCommandNames()
+		print("\n" + ughubHelp.GetOptionStringsForCommand(args[0]), end="")
+		return
+	
+	if len(args) >= 1 and ughubHelp.IsCommandInHelp(args[0]):
+		print(ughubHelp.GetOptionStringsForCommand(args[0]), end="")
 		return
 
 	if len(args) == 1:
-		print("addsource help genprojectfiles git init install installall packageinfo list log repair updatesources version")
+		ughubHelp.PrintCommandNames()
 		return 
 
-	if len(args) == 2 and args[0] == "help":
-		print("addsource help genprojectfiles git init install installall packageinfo list log repair updatesources version")
-		return
-
-def PrintPackageNames(args):
-	try:
-		packages = LoadPackageDescs()
-	except:
-		return
-		
-	if len(args) > 0 and args[0] == "installed":
-		for i in range(len(packages)):
-			if PackageIsInstalled(packages[i]):
-				if i == len(packages)-1:
-					print(packages[i]["name"], end="")
-				else:
-					print(packages[i]["name"])
-
-	else:
-		for i in range(len(packages)):
-			if i == len(packages)-1:
-				print(packages[i]["name"], end="")
-			else:
-				print(packages[i]["name"])
-
-
+	
 def RunUGHub(args):
 
 	exitCode = 1
@@ -1035,11 +1020,12 @@ def RunUGHub(args):
 			AddSource(args[1:])
 
 		elif cmd == "help":
-			print("")
 			if len(args) == 1:
 				ughubHelp.PrintHelp()
+			elif args[1] == "--commands":
+				ughubHelp.PrintCommandNames()
 			else:
-				ughubHelp.PrintCommandHelp(args[1])
+				ughubHelp.PrintCommandHelp(args[1], args[2:])
 
 		elif cmd == "genprojectfiles":
 			GenerateProjectFiles(args[1:])
@@ -1095,11 +1081,8 @@ def RunUGHub(args):
 			print("All rights reserved")
 		
 		elif cmd == "get-completions":
-			GetAutoCompletions(args[2:])
+			GetAutoCompletions(args[1:])
 		
-		elif cmd == "get-packagenames":
-			PrintPackageNames(args[1:])
-
 		else:
 			print("Unknown command: '{0}'".format(cmd))
 			ughubHelp.PrintUsage()
