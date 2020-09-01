@@ -1,2 +1,2 @@
 @echo off
-py "%~dp0\ughub.py" %*
+python "%~dp0\ughub.py" %*
