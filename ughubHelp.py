@@ -94,7 +94,7 @@ def PrintCommandNames():
 # Prints help for the command specified in 'cmd'.
 def PrintCommandHelp(cmdName, args=[]):
 
-	shortdesc = ughubUtil.HasCommandlineOption(args, ("--shortdescription",))
+	shortdesc = ughubUtil.HasCommandlineOption(args, ("--short",))
 
 	try:
 		cmdDict = GetHelpEntry("commands.{0}".format(cmdName))

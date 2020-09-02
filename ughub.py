@@ -1080,7 +1080,7 @@ def RunUGHub(args):
 			print("Copyright 2015 G-CSC, Goethe University Frankfurt")
 			print("All rights reserved")
 		
-		elif cmd == "get-completions":
+		elif cmd == "getcompletions":
 			GetAutoCompletions(args[1:])
 		
 		else:

@@ -3,7 +3,7 @@ $scriptblock = {
     
     $tokens = $commandAst.Extent.Text.Trim() -split ' '
     $first, $rest = $tokens
-    $completions = &"ughub" get-completions $rest
+    $completions = &"ughub" getcompletions $rest
 
     $completions | Where-Object {$_ -like "${wordToComplete}*"} | ForEach-Object {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)

@@ -1,7 +1,7 @@
 #/usr/bin/env bash
 _ughub_completions()
 {
-    local suggestions=$(ughub get-completions ${COMP_WORDS[@]:1})
+    local suggestions=$(ughub getcompletions ${COMP_WORDS[@]:1})
     COMPREPLY=($(compgen -W "${suggestions[@]}" -- "${COMP_WORDS[-1]}"))
 }
 

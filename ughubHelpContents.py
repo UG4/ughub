@@ -111,7 +111,7 @@ content = {
 					"description":	"Prints all available commands, separated by a space."
 				},
 				{
-					"name": "--shortdescription",
+					"name": "--short",
 					"description":	"Only prints a short description of the command."
 				},
 			]
@@ -361,8 +361,8 @@ content = {
 		},
 
 		{
-			"name": "get-completions",
-			"usage": "ughub get-completions TYPEDSTRING",
+			"name": "getcompletions",
+			"usage": "ughub getcompletions TYPEDSTRING",
 			"shortdescription": "Returns auto complete suggestions.",
 			"description":	"Returns auto complete suggestions based on TYPEDSTRING, the symbols the user typed until now.\n"
 							"This uses information such as available commands, installed packages, usable options..."
