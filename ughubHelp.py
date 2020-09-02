@@ -116,7 +116,7 @@ def PrintCommandHelp(cmdName, args=[]):
 	try:
 		options = ughubUtil.GetFromNestedTable(cmdDict, "options")
 	except ughubUtil.NestedTableEntryNotFoundError:
-		pass
+		return
 
 	print("")
 	print("Valid options:")
