@@ -84,6 +84,14 @@ If you choose to edit your PATH variable, please make sure to reload your .bash_
 
     source $HOME/.bash_profile
 
+If you are interested in using auto-completion (in bash) while using ughub, add the following additional line to your $HOME/.bash_profile or $HOME/.bashrc file
+
+    source $HOME/ughub/autocompletions/ughub-completion.bash
+
+and reload the file. Alternatively, you can place this line in '\~/.bash_completion'.
+To use this in zsh, you need to use bashcompinit, see [here](https://stackoverflow.com/a/8492043).
+Autocomplete is also availabl for fish. To use this, copy 'autocompletions/ughub-completion.fish' to '\~/.config/fish/completions/ughub.fish' (and reload your fish instance).
+
 ## Installing ughub (Windows)
 ughub should run out of the box on Windows too. However, in order to execute it from any path, you should add
 
@@ -99,6 +107,19 @@ in your shell. This opens the _System Properties_ dialog and highlights the _Adv
 
 When you're done, press 'OK' to close the dialog. Make sure to restart your Shell in order to apply the changes.
 
+Autocompletion on windows only works in powershell. To use it, add the line
+
+    C:\Users\YOURNAME\ughub\autocompletions\ughub-completion.ps1
+
+to the file (you might need to create it)
+
+    C:\Users\YOURNAME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+
+If you wish to use it, you need to [allow powershell scripts to execute](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7). Execute the following in an PowerShell session executed as Administrator:
+
+    Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+
+Take a look at [this](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7#profiles-and-execution-policy) to learn about powershell profiles and execution policy.
 
 # First steps
 ughub serves as a package management tool for the UG4 simulation framework. Use the following command to get some help on ughub's usage:

@@ -445,14 +445,22 @@ def ListPackages(args):
 		for pkg in packages:
 			packageDict[pkg["name"]] = packageDict.get(pkg["name"], []) + [pkg]
 
-		print("{0:24.4}  {1:10} {2:11} {3:}"
-				.format("NAME", "PREFIX", "SOURCE", "URL"))
+		namesonly = ughubUtil.HasCommandlineOption(args, ("--namesonly",))
 
-		for key in sorted(packageDict.keys()):
-			pkgs = packageDict[key]
-			for pkg in pkgs:
-				print("{0:24}  {1:10} {2:11} {3:}"
-					  .format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
+		if namesonly:
+			for key in sorted(packageDict.keys()):
+				pkgs = packageDict[key]
+				for pkg in pkgs:
+					print(pkg["name"], end=" ")
+		else:
+			print("{0:24.4}  {1:10} {2:11} {3:}"
+					.format("NAME", "PREFIX", "SOURCE", "URL"))
+
+			for key in sorted(packageDict.keys()):
+				pkgs = packageDict[key]
+				for pkg in pkgs:
+					print("{0:24}  {1:10} {2:11} {3:}"
+						.format(pkg["name"], pkg["prefix"], pkg["__SOURCE"], pkg["url"]))
 
 	except LookupError as e:
 		raise InvalidPackageError(e)
@@ -949,7 +957,47 @@ def GenerateProjectFiles(args):
 	else:
 		ughubProjectFileGenerator.Run(GetRootDirectory(), args[0], name, overwriteFiles)
 
+def GetAutoCompletions(args):
 
+	if len(args) >= 1 and args[0] == "install":
+		try:
+			packages = LoadPackageDescs()
+		except:
+			return
+		result = ughubHelp.GetOptionStringsForCommand("install")
+		result += "\n"
+		for p in packages:
+			result += p["name"] + "\n"
+		print(result[:-1], end="")
+		return
+
+	if len(args) >= 1 and args[0] == "log":
+		try:
+			packages = LoadPackageDescs()
+		except:
+			return
+		result = ughubHelp.GetOptionStringsForCommand("log")
+		result += "\n"
+		for p in packages:
+			if PackageIsInstalled(p):
+				result += p["name"] + "\n"
+		print(result[:-1], end="")	
+		return
+
+	if len(args) >= 1 and args[0] == "help":
+		ughubHelp.PrintCommandNames()
+		print("\n" + ughubHelp.GetOptionStringsForCommand(args[0]), end="")
+		return
+	
+	if len(args) >= 1 and ughubHelp.IsCommandInHelp(args[0]):
+		print(ughubHelp.GetOptionStringsForCommand(args[0]), end="")
+		return
+
+	if len(args) == 1:
+		ughubHelp.PrintCommandNames()
+		return 
+
+	
 def RunUGHub(args):
 
 	exitCode = 1
@@ -972,11 +1020,12 @@ def RunUGHub(args):
 			AddSource(args[1:])
 
 		elif cmd == "help":
-			print("")
 			if len(args) == 1:
 				ughubHelp.PrintHelp()
+			elif args[1] == "--commands":
+				ughubHelp.PrintCommandNames()
 			else:
-				ughubHelp.PrintCommandHelp(args[1])
+				ughubHelp.PrintCommandHelp(args[1], args[2:])
 
 		elif cmd == "genprojectfiles":
 			GenerateProjectFiles(args[1:])
@@ -1030,7 +1079,10 @@ def RunUGHub(args):
 			print("ughub, version {}".format(g_ughubVersionString))
 			print("Copyright 2015 G-CSC, Goethe University Frankfurt")
 			print("All rights reserved")
-
+		
+		elif cmd == "getcompletions":
+			GetAutoCompletions(args[1:])
+		
 		else:
 			print("Unknown command: '{0}'".format(cmd))
 			ughubHelp.PrintUsage()
