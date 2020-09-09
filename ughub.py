@@ -448,10 +448,13 @@ def ListPackages(args):
 		namesonly = ughubUtil.HasCommandlineOption(args, ("--namesonly",))
 
 		if namesonly:
+			result = ""
 			for key in sorted(packageDict.keys()):
 				pkgs = packageDict[key]
 				for pkg in pkgs:
-					print(pkg["name"], end=" ")
+					result += pkg["name"] + " "
+					sys.stdout.write(result)
+					sys.stdout.flush()
 		else:
 			print("{0:24.4}  {1:10} {2:11} {3:}"
 					.format("NAME", "PREFIX", "SOURCE", "URL"))
@@ -968,7 +971,9 @@ def GetAutoCompletions(args):
 		result += "\n"
 		for p in packages:
 			result += p["name"] + "\n"
-		print(result[:-1], end="")
+		
+		sys.stdout.write(result[:-1])
+		sys.stdout.flush()
 		return
 
 	if len(args) >= 1 and args[0] == "log":
@@ -981,16 +986,19 @@ def GetAutoCompletions(args):
 		for p in packages:
 			if PackageIsInstalled(p):
 				result += p["name"] + "\n"
-		print(result[:-1], end="")	
+		sys.stdout.write(result[:-1])
+		sys.stdout.flush()
 		return
 
 	if len(args) >= 1 and args[0] == "help":
 		ughubHelp.PrintCommandNames()
-		print("\n" + ughubHelp.GetOptionStringsForCommand(args[0]), end="")
+		sys.stdout.write("\n" + ughubHelp.GetOptionStringsForCommand(args[0]))
+		sys.stdout.flush()
 		return
 	
 	if len(args) >= 1 and ughubHelp.IsCommandInHelp(args[0]):
-		print(ughubHelp.GetOptionStringsForCommand(args[0]), end="")
+		sys.stdout.write(ughubHelp.GetOptionStringsForCommand(args[0]))
+		sys.stdout.flush()
 		return
 
 	if len(args) == 1:

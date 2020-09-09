@@ -28,6 +28,7 @@
 
 import ughubUtil
 import ughubHelpContents
+import sys
 
 class MalformedHelpContentsError(Exception) : pass
 
@@ -88,8 +89,10 @@ def PrintCommandNames():
 	result = ""
 	for cmd in GetCommandsInHelp():		
 		for c in cmd.split(","):
-			result += c.strip() + "\n"			
-	print(result[:-1], end ="")
+			result += c.strip() + "\n"	
+				
+	sys.stdout.write(result[:-1])
+	sys.stdout.flush()
 
 # Prints help for the command specified in 'cmd'.
 def PrintCommandHelp(cmdName, args=[]):
@@ -105,7 +108,8 @@ def PrintCommandHelp(cmdName, args=[]):
 
 	if shortdesc:
 		if "shortdescription" in cmdDict:
-			print(cmdDict["shortdescription"], end="")
+			sys.stdout.write(cmdDict["shortdescription"])
+			sys.stdout.flush()
 		return
 
 	print("Usage: ughub {0}".format(cmdDict["usage"]))
