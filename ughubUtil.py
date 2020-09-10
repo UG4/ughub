@@ -94,3 +94,7 @@ def RemoveOptions(args):
 		if len(a) > 0 and a[0] != "-":
 			filteredArgs.append(a)
 	return filteredArgs
+
+def Write(string):
+	sys.stdout.write(string)
+	sys.stdout.flush()

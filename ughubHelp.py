@@ -91,8 +91,7 @@ def PrintCommandNames():
 		for c in cmd.split(","):
 			result += c.strip() + "\n"	
 				
-	sys.stdout.write(result[:-1])
-	sys.stdout.flush()
+	ughubUtil.Write(result[:-1])
 
 # Prints help for the command specified in 'cmd'.
 def PrintCommandHelp(cmdName, args=[]):
@@ -108,8 +107,7 @@ def PrintCommandHelp(cmdName, args=[]):
 
 	if shortdesc:
 		if "shortdescription" in cmdDict:
-			sys.stdout.write(cmdDict["shortdescription"])
-			sys.stdout.flush()
+			ughubUtil.Write(cmdDict["shortdescription"])
 		return
 
 	print("Usage: ughub {0}".format(cmdDict["usage"]))
