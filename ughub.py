@@ -107,7 +107,7 @@ def GenerateCMakeLists(path=None):
 	f.write("# WARNING: PLEASE DO NOT CHANGE THIS FILE (any changes may be lost)\n")
 	f.write("# This file was automatically generated and may be overwritten without notice.\n")
 	f.write("\n")
-	f.write("cmake_minimum_required(VERSION 2.8.12...3.27.1)\n")
+	f.write("cmake_minimum_required(VERSION 2.8.12)\n")
 	f.write("project(UG4)\n")
 	f.write("if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ugcore)\n")
 	f.write("	add_subdirectory(ugcore)\n")
