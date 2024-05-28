@@ -1,6 +1,6 @@
 # ughub #
 
-**ughub** - package managment for the [UG4](https://github.com/UG4) simulation environment
+**ughub** - package management for the [UG4](https://github.com/UG4) simulation environment
 
 Copyright 2015-2018 G-CSC, Goethe-University Frankfurt am Main
 
@@ -27,7 +27,7 @@ It also provides a brief introduction on how to build UG4.
 
     'Start -> All Programs -> Visual Studio 2015'.
 
-If you're using Windows, Please replace $HOME with %HOMEPATH% for the remainder of this introduction.
+If you're using Windows, Please replace `$HOME` with `%HOMEPATH%` for the remainder of this introduction.
 
 ### Python
 ughub requires _**Python**_ to run (at least version 2.6 should be available, higher is recommended). Please make sure that python is installed by executing the following command (Mac-OSX, Linux):
@@ -50,7 +50,7 @@ Mac and Windows users can download an installer from <https://www.python.org/dow
 Please also make sure that _**git**_ is installed on your system and that it can be invoked from your terminal or shell.
 
 ### CMake
-You will need _**cmake_** to generate the build files for your compiler. On Unix systems you may install cmake using your package manager:
+You will need _**cmake**_ to generate the build files for your compiler. On Unix systems you may install cmake using your package manager:
 
     sudo apt-get install cmake
 
@@ -62,7 +62,7 @@ Please clone the github repository, e.g. by executing the following commands:
     cd $HOME
     git clone https://github.com/UG4/ughub
 
-This will download ughub to _$HOME/ughub_. You may of course clone the repository to any other location. Simply replace _$HOME/ughub_ with your path for the remainder of this introduction.
+This will download ughub to _`$HOME/ughub`_. You may of course clone the repository to any other location. Simply replace _`$HOME/ughub`_ with your path for the remainder of this introduction.
 
 Please make sure to update your ughub installation from time to time by executing
 
@@ -71,11 +71,11 @@ Please make sure to update your ughub installation from time to time by executin
 
 
 ## Installing ughub (Mac-OSX, Linux)
-ughub should run out of the box. However, in order to execute it from any path, you should either edit your PATH environment variable by adding the following line to your $HOME/.bash_profile or $HOME/.bashrc file
+ughub should run out of the box. However, in order to execute it from any path, you should either edit your PATH environment variable by adding the following line to your `$HOME/.bash_profile` or `$HOME/.bashrc` file
 
     export PATH=$PATH:$HOME/ughub
 
-or create a link to $HOME/ughub/ughub from within a path which is already contained in your PATH variable, e.g., like this
+or create a link to `$HOME/ughub/ughub` from within a path which is already contained in your PATH variable, e.g., like this
 
     cd $HOME/bin
     ln -s $HOME/ughub/ughub ughub
@@ -84,20 +84,23 @@ If you choose to edit your PATH variable, please make sure to reload your .bash_
 
     source $HOME/.bash_profile
 
-If you are interested in using auto-completion (in bash) while using ughub, add the following additional line to your $HOME/.bash_profile or $HOME/.bashrc file
+If you are interested in using auto-completion (in bash) while using ughub, add the following additional line to your `$HOME/.bash_profile` or `$HOME/.bashrc` file
 
     source $HOME/ughub/autocompletions/ughub-completion.bash
 
-and reload the file. Alternatively, you can place this line in '\~/.bash_completion'.
-To use this in zsh, you need to use bashcompinit, see [here](https://stackoverflow.com/a/8492043).
-Autocomplete is also availabl for fish. To use this, copy 'autocompletions/ughub-completion.fish' to '\~/.config/fish/completions/ughub.fish' (and reload your fish instance).
+and reload the file. Alternatively, you can place this line in `~/.bash_completion`.
+<!-- To use this in zsh, you need to use bashcompinit, see [here](https://stackoverflow.com/a/8492043). -->
+
+To use this in zsh, you need to copy 'autocompletions/ughub-completion.zsh' to a directory in your `$fath` and rename it to `_ughub` (and reload your shell).
+
+Autocomplete is also available for fish. To use this, copy 'autocompletions/ughub-completion.fish' to `~/.config/fish/completions/ughub.fish` (and reload your fish instance).
 
 ## Installing ughub (Windows)
 ughub should run out of the box on Windows too. However, in order to execute it from any path, you should add
 
     $HOME/ughub
 
-to your _**Path**_ environment variable (replace $HOME with the actual path). In order to do so, enter
+to your _**Path**_ environment variable (replace `$HOME` with the actual path). In order to do so, enter
 
     SystemPropertiesAdvanced
 
@@ -136,7 +139,7 @@ Now we can initialize this directory for usage with ughub:
     cd $HOME/ug4
     ughub init
 
-This creates a local CMakeLists.txt file and creates a hidden folder '.ughub' in which package-sources are maintained. All further calls to ughub from within the directory tree located at $HOME/ug4 will now relate to this main directory.  
+This creates a local CMakeLists.txt file and creates a hidden folder '.ughub' in which package-sources are maintained. All further calls to ughub from within the directory tree located at `$HOME/ug4` will now relate to this main directory.  
 To view a list of available packages, execute
 
     ughub list
@@ -151,7 +154,7 @@ To install a package, simply execute 'ughub install' with one or more of the ava
 
 Dependent packages will now be automatically installed.
 
-In order to add new package-sources, ughub provides the command 'addsource'. Theoretically, anybody can create new package-sources and host them e.g. on github. UG4's public package-source is hosted at
+In order to add new package-sources, ughub provides the command `addsource`. Theoretically, anybody can create new package-sources and host them e.g. on github. UG4's public package-source is hosted at
 
 https://github.com/UG4/ug4-packages
 
@@ -172,7 +175,7 @@ The Microsoft Visual C++ compiler is recommended for compilation of ug4 on windo
 To allow for parallel compilation in the terminal one can optionally use the tool [jom](https://wiki.qt.io/Jom). Extract it and add the path in which the executable lies to your Path environment variable.
 
 ## Preparations (Unix)
-Before compiling UG4 on Unix, please add the following line to your $HOME/.bashrc or $HOME/.bash_profile file:
+Before compiling UG4 on Unix, please add the following line to your `$HOME/.bashrc` or `$HOME/.bash_profile` file:
 
     source $HOME/ug4/ugcore/scripts/shell/ugbash
 
@@ -208,7 +211,7 @@ Note that static linking should be enabled by default on Windows. If you'd like 
 
 ## Configuring your build
 Each time you'll execute cmake on your ug4 folder, a list of installed plugins will be shown.
-In order to activate an installed plugin, specify the cmake option -DPLUGIN_NAME=ON, e.g.:
+In order to activate an installed plugin, specify the cmake option `-DPLUGIN_NAME=ON`, e.g.:
 
     cmake -DConvectionDiffusion=ON .
 
