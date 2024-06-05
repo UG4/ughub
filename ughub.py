@@ -598,10 +598,10 @@ def GetCurrentRemoteGitURLs(pkg, origin = "origin"):
 										.format(pkg["name"], pkgPath))
 
 			for line in gitLog.splitlines():
-				m = re.match("^origin\s+(.+?)\s+\(fetch\)$", line)
+				m = re.match(r"^origin\s+(.+?)\s+\(fetch\)$", line)
 				if m:
 					originFetchURL = m.group(1)
-				m = re.match("^origin\s+(.+?)\s+\(push\)$", line)
+				m = re.match(r"^origin\s+(.+?)\s+\(push\)$", line)
 				if m:
 					originPushURL = m.group(1)
 
