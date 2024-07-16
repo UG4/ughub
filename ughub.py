@@ -512,7 +512,7 @@ def PrintPackageInfo(args):
 
 		except LookupError:
 			raise InvalidSourceError("Failed to access package list in '{0}'"
-									 .format(packagesFile))
+									 .format(packageName))
 
 
 def GetPackageDir(pkg):

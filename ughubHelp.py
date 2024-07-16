@@ -28,7 +28,7 @@
 
 import ughubUtil
 import ughubHelpContents
-import sys
+
 
 class MalformedHelpContentsError(Exception) : pass
 

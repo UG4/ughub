@@ -32,23 +32,24 @@ import os
 
 PathNode = collections.namedtuple("PathTypePair", "path type ignore")
 
-def CollectAffectedFiles(path, svnPath, conf):
-	files = sorted(os.listdir(path))
-	affectedFiles = []
-	for f in files:
-		fullName = os.path.join(path, f)
-		if os.path.isdir(fullName):
-			svnName = os.path.join(svnPath, f)
-			affectedFiles = affectedFiles + CollectAffectedFiles(fullName, svnName, conf)
 
-	for f in files:
-		fullName = os.path.join(path, f)
-		if os.path.isfile(fullName):
-			svnName = os.path.join(svnPath, f)
-			if ConsiderFile(svnName, conf):
-				affectedFiles.append(AffectedFile(fullName, svnName))
-
-	return affectedFiles
+#def CollectAffectedFiles(path, svnPath, conf):
+#	files = sorted(os.listdir(path))
+#	affectedFiles = []
+#	for f in files:
+#		fullName = os.path.join(path, f)
+#		if os.path.isdir(fullName):
+#			svnName = os.path.join(svnPath, f)
+#			affectedFiles = affectedFiles + CollectAffectedFiles(fullName, svnName, conf)
+#
+#	for f in files:
+#		fullName = os.path.join(path, f)
+#		if os.path.isfile(fullName):
+#			svnName = os.path.join(svnPath, f)
+#			if ConsiderFile(svnName, conf):
+#				affectedFiles.append(AffectedFile(fullName, svnName))
+#
+#	return affectedFiles
 
 
 def ListPaths(path):
