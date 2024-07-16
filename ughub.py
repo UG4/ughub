@@ -608,6 +608,19 @@ def GetCurrentRemoteGitURLs(pkg, origin = "origin"):
 	return originFetchURL, originPushURL
 
 
+def get_submodules(pkg, prefix_path):
+	print()
+	submodule_file = os.path.join(prefix_path, ".gitmodules")
+	if os.path.isfile(submodule_file):
+		proc = subprocess.Popen(["git", "submodule", "init"], cwd=prefix_path)
+		if proc.wait() != 0:
+			raise TransactionError(f"Couldn't initialize submodules '{pkg["name"]}'")
+
+		proc = subprocess.Popen(["git", "submodule", "update"], cwd=prefix_path)
+		if proc.wait() != 0:
+			raise TransactionError(f"Couldn't update submodules '{pkg["name"]}'")
+
+
 def InstallPackage(args):
 	packageNames	= args
 	options			= []
@@ -798,8 +811,11 @@ def InstallPackage(args):
 					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], pkg["url"], pkg["name"]], cwd = prefixPath)
 					if proc.wait() != 0:
 						raise TransactionError("Couldn't clone package '{0}' with branch '{1}' from '{2}'"
+
 												.format(pkg["name"], pkg["__BRANCH"], pkg["url"]))
 
+					module_path = os.path.join(prefixPath, pkg["name"])
+					get_submodules(pkg, module_path)
 		else:
 			raise InvalidPackageError("Unsupported repository type of package '{0}': '{1}'"
 							   		  .format(pkg["name"], pkg["repoType"]))
