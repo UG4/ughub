@@ -61,8 +61,10 @@ def CompareVersions(vstr0, vstr1):
 	nums0 = vstr0.split(".")
 	nums1 = vstr1.split(".")
 	for v0, v1 in zip(nums0, nums1):
-		if v0 > v1:
+		if v0 > v1: # todo switch to int-comparision?
 			return False
+		if v0 < v1:
+			return True
 	return True
 
 
@@ -1152,5 +1154,5 @@ def RunUGHub(args):
 
 	return exitCode
 
-
-sys.exit(RunUGHub(sys.argv[1:]))
+if __name__ == "__main__":
+	sys.exit(RunUGHub(sys.argv[1:]))
