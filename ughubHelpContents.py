@@ -362,7 +362,7 @@ content = {
 
 		{
 			"name": "getcompletions",
-			"usage": "ughub getcompletions TYPEDSTRING",
+			"usage": "getcompletions TYPEDSTRING",
 			"shortdescription": "Returns auto complete suggestions.",
 			"description":	"Returns auto complete suggestions based on TYPEDSTRING, the symbols the user typed until now.\n"
 							"This uses information such as available commands, installed packages, usable options..."
