@@ -712,7 +712,6 @@ def InstallPackage(args):
 		if not firstPkg:
 			print("")
 		firstPkg = False
-		pkg["url"] = transform_ssh(pkg["url"])
 		print(ShortPackageInfo(pkg))
 
 	#	check whether the package is already installed
@@ -820,7 +819,7 @@ def InstallPackage(args):
 						os.makedirs(pkgPath)
 					package_url = transform_ssh(pkg["url"])
 
-					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], package_url, pkg["name"]], cwd = prefixPath)
+					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], pkg["url"], pkg["name"]], cwd = prefixPath)
 					if proc.wait() != 0:
 						raise TransactionError("Couldn't clone package '{0}' with branch '{1}' from '{2}'"
 
