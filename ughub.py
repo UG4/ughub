@@ -624,11 +624,11 @@ def get_submodules(pkg, prefix_path):
 	if os.path.isfile(submodule_file):
 		proc = subprocess.Popen(["git", "submodule", "init"], cwd=prefix_path)
 		if proc.wait() != 0:
-			raise TransactionError(f"Couldn't initialize submodules '{pkg["name"]}'")
+			raise TransactionError(f"Couldn't initialize submodules '"+pkg["name"]+"'")
 
 		proc = subprocess.Popen(["git", "submodule", "update"], cwd=prefix_path)
 		if proc.wait() != 0:
-			raise TransactionError(f"Couldn't update submodules '{pkg["name"]}'")
+			raise TransactionError(f"Couldn't update submodules '"+pkg["name"]+"'")
 
 
 def InstallPackage(args):
