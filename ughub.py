@@ -243,7 +243,7 @@ def UpdateSource(src, path=None):
 
 	try:
 		name = src["name"]
-		url = src["url"]
+		url = transform_ssh(src["url"])
 		branch = src["branch"]
 
 		srcDir = os.path.join(sourcesDir, name)
@@ -609,6 +609,14 @@ def GetCurrentRemoteGitURLs(pkg, origin = "origin"):
 
 	return originFetchURL, originPushURL
 
+def transform_ssh(package):
+	package_url = package
+	if package_url.startswith("https://"):
+		parts = package_url.split("/")
+		identifier = "/".join(parts[3:])
+		package_url = "git@" + parts[2] + ":" + identifier
+	print(package_url)
+	return package_url
 
 def get_submodules(pkg, prefix_path):
 	print()
@@ -809,12 +817,13 @@ def InstallPackage(args):
 				if not dryRun:
 					if not os.path.exists(pkgPath):
 						os.makedirs(pkgPath)
+					package_url = transform_ssh(pkg["url"])
 
-					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], pkg["url"], pkg["name"]], cwd = prefixPath)
+					proc = subprocess.Popen(["git", "clone", "--branch", pkg["__BRANCH"], package_url, pkg["name"]], cwd = prefixPath)
 					if proc.wait() != 0:
 						raise TransactionError("Couldn't clone package '{0}' with branch '{1}' from '{2}'"
 
-												.format(pkg["name"], pkg["__BRANCH"], pkg["url"]))
+												.format(pkg["name"], pkg["__BRANCH"], package_url))
 
 					module_path = os.path.join(prefixPath, pkg["name"])
 					get_submodules(pkg, module_path)
