@@ -671,7 +671,7 @@ def InstallPackage(args):
 	textRemoteConflictUF = (""
 		"{0}: Url of remote 'origin' of package '{1}' does not correspond\n"
 		"  to the current source-definition:\n"
-		"  currentt URL: '{2}'\n"
+		"  current URL: '{2}'\n"
 		"  expected URL: '{3}'\n"
 		"  This is most likely a result of an updated source-definition (e.g. through 'ughub updatesources').")
 
@@ -712,6 +712,7 @@ def InstallPackage(args):
 		if not firstPkg:
 			print("")
 		firstPkg = False
+		pkg["url"] = transform_ssh(pkg["url"])
 		print(ShortPackageInfo(pkg))
 
 	#	check whether the package is already installed
