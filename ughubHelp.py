@@ -32,142 +32,136 @@ import ughubHelpContents
 
 class MalformedHelpContentsError(Exception) : pass
 
-def GetHelpEntry(entry):
-	return ughubUtil.GetFromNestedTable(ughubHelpContents.content, entry)
+def get_help_entry(entry):
+    return ughubUtil.get_from_nested_table(ughubHelpContents.content, entry)
 
+def get_commands_in_help():
+    try:
+        d = get_help_entry("commands")
+        out = []
 
-def GetCommandsInHelp():
-	try:
-		d = GetHelpEntry("commands")
-		out = []
+        if type(d) == list:
+            for e in d:
+                name = e["name"]
+                if type(name) == str:
+                    out.append(name)
+                elif type(name) == list and len(name) > 0:
+                    s = name[0]
+                    for i in range(1, len(name)):
+                        s = s + ", " + name[i]
+                    out.append(s)
+        else:
+            raise MalformedHelpContentsError("'commands' entry has to be a list")
+    except ughubUtil.NestedTableEntryNotFoundError as e:
+        raise MalformedHelpContentsError("'commands' list required in help contents")
 
-		if type(d) == list:
-			for e in d:
-				name = e["name"]
-				if type(name) == str:
-					out.append(name)
-				elif type(name) == list and len(name) > 0:
-					s = name[0]
-					for i in range(1, len(name)):
-						s = s + ", " + name[i]
-					out.append(s)
-		else:
-			raise MalformedHelpContentsError("'commands' entry has to be a list")
-	except ughubUtil.NestedTableEntryNotFoundError as e:
-		raise MalformedHelpContentsError("'commands' list required in help contents")
+    return out
 
-	return out
+def is_command_in_help(command):
+    try:
+        d = get_help_entry("commands")
+        if type(d) == list:
+            for e in d:
+                name = e["name"]
+                if type(name) == str and name == command:
+                    return True
+                elif type(name) == list and command in name:
+                    return True                        
+        else:
+            raise MalformedHelpContentsError("'commands' entry has to be a list")
+    except ughubUtil.NestedTableEntryNotFoundError as e:
+        raise MalformedHelpContentsError("'commands' list required in help contents")
+    return False
 
-def IsCommandInHelp(command):
-	try:
-		d = GetHelpEntry("commands")
-		if type(d) == list:
-			for e in d:
-				name = e["name"]
-				if type(name) == str and name == command:
-					return True
-				elif type(name) == list and command in name:
-					return True						
-		else:
-			raise MalformedHelpContentsError("'commands' entry has to be a list")
-	except ughubUtil.NestedTableEntryNotFoundError as e:
-		raise MalformedHelpContentsError("'commands' list required in help contents")
-	return False
+def print_usage():
+    try:
+        print(get_help_entry("usage"))
+    except ughubUtil.NestedTableEntryNotFoundError as e:
+        raise MalformedHelpContentsError(e)
 
-def PrintUsage():
-	try:
-		print(GetHelpEntry("usage"))
-	except ughubUtil.NestedTableEntryNotFoundError as e:
-		raise MalformedHelpContentsError(e)
+def print_commands():
+    for cmd in get_commands_in_help():
+        print("  {0}".format(cmd))
 
-
-def PrintCommands():
-	for cmd in GetCommandsInHelp():
-		print("  {0}".format(cmd))
-
-def PrintCommandNames():
-	result = ""
-	for cmd in GetCommandsInHelp():		
-		for c in cmd.split(","):
-			result += c.strip() + "\n"	
-				
-	ughubUtil.Write(result[:-1])
+def print_command_names():
+    result = ""
+    for cmd in get_commands_in_help():
+        for c in cmd.split(","):
+            result += c.strip() + "\n"    
+                
+    ughubUtil.write(result[:-1])
 
 # Prints help for the command specified in 'cmd'.
-def PrintCommandHelp(cmdName, args=[]):
+def print_command_help(cmd_name, args=[]): # todo remove [] from default
 
-	shortdesc = ughubUtil.HasCommandlineOption(args, ("--short",))
+    short_desc = ughubUtil.has_commandline_option(args, ("--short",))
 
-	try:
-		cmdDict = GetHelpEntry("commands.{0}".format(cmdName))
+    try:
+        cmd_dict = get_help_entry("commands.{0}".format(cmd_name))
 
-	except ughubUtil.NestedTableEntryNotFoundError:
-		raise MalformedHelpContentsError("Requested command '{0}' not found in help database"
-			  							 .format(cmdName))
+    except ughubUtil.NestedTableEntryNotFoundError:
+        raise MalformedHelpContentsError("Requested command '{0}' not found in help database".format(cmd_name))
 
-	if shortdesc:
-		if "shortdescription" in cmdDict:
-			ughubUtil.Write(cmdDict["shortdescription"])
-		return
+    if short_desc:
+        if "shortdescription" in cmd_dict:
+            ughubUtil.write(cmd_dict["shortdescription"])
+        return
 
-	print("Usage: ughub {0}".format(cmdDict["usage"]))
-	print("")
-	for line in cmdDict["description"].splitlines():
-		print("  {0}".format(line))
+    print("Usage: ughub {0}".format(cmd_dict["usage"]))
+    print()
+    for line in cmd_dict["description"].splitlines():
+        print("  {0}".format(line))
 
-	try:
-		options = ughubUtil.GetFromNestedTable(cmdDict, "options")
-	except ughubUtil.NestedTableEntryNotFoundError:
-		return
+    try:
+        options = ughubUtil.get_from_nested_table(cmd_dict, "options")
+    except ughubUtil.NestedTableEntryNotFoundError:
+        return
 
-	print("")
-	print("Valid options:")
-	for opt in options:
-		name = opt["name"]
-		sep = ":"
-		for line in opt["description"].splitlines():
-			print("  {0:20}{1} {2}".format(name, sep, line))
-			name = ""
-			sep = " "
-	
+    print()
+    print("Valid options:")
+    for opt in options:
+        name = opt["name"]
+        sep = ":"
+        for line in opt["description"].splitlines():
+            print("  {0:20}{1} {2}".format(name, sep, line))
+            name = ""
+            sep = " "
 
-	
+def get_option_strings_for_command(command_name):
+    result = ""
+    try:
+        cmd_dict = get_help_entry("commands.{0}".format(command_name))
+        
+        try:
+            options = ughubUtil.get_from_nested_table(cmd_dict, "options")
+            
+            for opt in options:
+                option_strings = opt["name"]
 
-def GetOptionStringsForCommand(cmdName):
-	result = ""
-	try:
-		cmdDict = GetHelpEntry("commands.{0}".format(cmdName))
-		
-		try:
-			options = ughubUtil.GetFromNestedTable(cmdDict, "options")
-			
-			for opt in options:
-				optionstrings = opt["name"]
+                # filter out [ ]            
+                option_strings = option_strings.replace("[", "").replace("]", "")
 
-				# filter out [ ]			
-				optionstrings = optionstrings.replace("[", "").replace("]", "")
+                # split
+                option_strings = option_strings.split(" ")
 
-				# split
-				optionstrings = optionstrings.split(" ")
+                # which of those start with - or --?
+                option_strings = list(filter(lambda s: s.startswith('-') or s.startswith('--'), option_strings))
 
-				# which of those start with - or --?
-				optionstrings = list(filter(lambda s: s.startswith('-') or s.startswith('--'), optionstrings))
+                for ss in option_strings:
+                    result += ss + "\n"
+                
+        except ughubUtil.NestedTableEntryNotFoundError:
+            pass
 
-				for s in optionstrings:
-					result += s + "\n"
-				
-		except ughubUtil.NestedTableEntryNotFoundError:
-			pass
+    except ughubUtil.NestedTableEntryNotFoundError:
+        raise MalformedHelpContentsError("Requested command '{0}' not found in help database"
+                                           .format(command_name))
 
-	except ughubUtil.NestedTableEntryNotFoundError:
-		raise MalformedHelpContentsError("Requested command '{0}' not found in help database"
-			  							 .format(cmdName))
-
-	return result[:-1]
+    return result[:-1]
 
 # Prints help on how to use the help command and a list of all available commands
-def PrintHelp():
-	PrintCommandHelp("help")
-	print("")
-	print("available commands:")
-	PrintCommands()
+def print_help():
+    print_command_help("help")
+    print("")
+    print("available commands:")
+    print_commands()

@@ -1,5 +1,8 @@
+BSD 3-Clause License
+
 ughub - package management for the UG4 simulation environment
 
+Copyright 2025 UG4 Developer Team
 Copyright 2015 Goethe-Center for Scientific Computing, University Frankfurt
 Author: Sebastian Reiter <sreiter@gcsc.uni-frankfurt.de>
 All rights reserved.
@@ -16,7 +19,7 @@ modification, are permitted provided that the following conditions are met:
       derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
