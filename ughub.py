@@ -123,32 +123,21 @@ def generate_default_source_file(path=None):
 def generate_cmakelists(path=None):
     filename = os.path.join(get_root_directory(path), "CMakeLists.txt")
     print("Generating '{0}'".format(filename))
-    f = open(filename, "w")
-    f.write("# WARNING: PLEASE DO NOT CHANGE THIS FILE (any changes may be lost)\n")
-    f.write("# This file was automatically generated and may be overwritten without notice.\n")
-    f.write("\n")
-    f.write("cmake_minimum_required(VERSION 3.5)\n")
-    f.write("project(UG4)\n")
-    f.write("if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ugcore)\n")
-    f.write("    add_subdirectory(ugcore)\n")
-    f.write("else()\n")
-    f.write("    message(FATAL_ERROR \"Please install the 'ugcore' package using 'ughub install ugcore'.\")\n")
-    f.write("endif()\n")
-    f.close()
-    return 
-    # todo write file as one block / copy raw cmake file from resource folder 
-    f = open(filename, "w")
-    f.write("""# WARNING: PLEASE DO NOT CHANGE THIS FILE (any changes may be lost)\n
-    # This file was automatically generated and may be overwritten without notice.\n
-    \n
-    cmake_minimum_required(VERSION 3.5)\n
-    project(UG4)\n
-    if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ugcore)\n
-        add_subdirectory(ugcore)\n
-	else()\n
-	    message(FATAL_ERROR \"Please install the 'ugcore' package using 'ughub install ugcore'.\")\n
-	endif()\n""")
-    f.close()
+    default_cmakelists = """\
+# WARNING: PLEASE DO NOT CHANGE THIS FILE (any changes may be lost)
+# This file was automatically generated and may be overwritten without notice.
+
+cmake_minimum_required(VERSION 3.5)
+project(UG4)
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ugcore)
+    add_subdirectory(ugcore)
+else()
+    message(FATAL_ERROR "Please install the 'ugcore' package using 'ughub install ugcore'.")
+endif()
+"""
+    with open(filename, "w") as f:
+        f.write(default_cmakelists)
+
 
 def initialize_directory(args):
     force = ughubUtil.has_commandline_option(args, ("-f", "--force"))
@@ -251,7 +240,6 @@ def validate_source_names(sources):
             if source_name in names:
                 raise InvalidSourceError("duplicate source name: {0}".format(source_name))
             else:
-                # todo:    check name for invalid characters (e.g. '.')
                 names.append(source_name)
 
     except LookupError as e:
@@ -314,7 +302,7 @@ def list_sources():
 
 def load_package_descs_from_file(filename, source_name):
     packages_out = []
-    try: # todo simplify block try-try ?
+    try:
         try:
             content = json.loads(open(filename).read())
             if "minUGHubVersion" in content:
@@ -540,7 +528,7 @@ def get_package_dir(pkg):
 # returns a list of package descriptors that have to be installed for a given package.
 # note that this list may contain packages that are already installed.
 def build_package_dependency_list(package_name, available_packages, source=None,
-                               branch=None, processed_package_branch_pairs=[], # todo ersätta lista
+                               branch=None, processed_package_branch_pairs=[],
                                nodeps = False):
     packages_out = []
 
@@ -636,7 +624,7 @@ def transform_ssh(package):
     package_url = package
     if package_url.startswith("https://"):
         parts = package_url.split("/")
-        identifier = "/".join(parts[3:]) # todo check len(parts) and throw error/use monade
+        identifier = "/".join(parts[3:])
         package_url = "git@" + parts[2] + ":" + identifier
     return package_url
 
@@ -904,8 +892,6 @@ def call_git_on_package(pkg, git_command, args):
                                .format(git_command, pkg["name"], get_package_dir(pkg)))
 
 def cache_git_password():
-    # todo:    This currently only works on unix (tested on linux). A version for Windows
-    #        and possibly OSX has to be added.
     proc = subprocess.Popen("git config --global credential.helper cache".split())
     if proc.wait() != 0:
         raise TransactionError("Couldn't enable password caching! Please check your git version.")
@@ -1101,8 +1087,8 @@ def run_ughub(args):
     exit_code = 1
 
     try:
-        print(f"ughub version: {g_ughub_version_string}")
-        print(f"Python version: {sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}")
+        # print(f"ughub version: {g_ughub_version_string}")
+        # print(f"Python version: {sys.version_info[0]}.{sys.version_info[1]}.{sys.version_info[2]}")
 
         if args is None or len(args) == 0:
             ughubHelp.print_usage()
@@ -1127,22 +1113,6 @@ def run_ughub(args):
         elif cmd == "git":  # (ø) checked
             call_git_on_packages(args[2:], args[1])
 
-        # deprecated todo: remove (ø)
-        # elif cmd == "gitadd":
-        #    raise Exception("gitadd is no longer supported. Please call 'ughub git add' instead.")
-        #
-        # elif cmd == "gitcommit":
-        #     raise Exception("gitcommit is no longer supported. Please call 'ughub git commit' instead.")
-        #
-        # elif cmd == "gitpull":
-        #    raise Exception("gitpull is no longer supported. Please call 'ughub git pull' instead.")
-        #
-        # elif cmd == "gitpush":
-        #    raise Exception("gitpush is no longer supported. Please call 'ughub git push' instead.")
-        #
-        # elif cmd == "gitstatus":
-        #    raise Exception("gitstatus is no longer supported. Please call 'ughub git status' instead.")
-        
         elif cmd == "init": # (ø) checked
             initialize_directory(args[1:])
 

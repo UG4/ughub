@@ -92,9 +92,11 @@ def print_command_names():
     ughubUtil.write(result[:-1])
 
 # Prints help for the command specified in 'cmd'.
-def print_command_help(cmd_name, args=[]): # todo remove [] from default
-
-    short_desc = ughubUtil.has_commandline_option(args, ("--short",))
+def print_command_help(cmd_name, args=None):
+    if args:
+        short_desc = ughubUtil.has_commandline_option(args, ("--short",))
+    else:
+        short_desc = None
 
     try:
         cmd_dict = get_help_entry("commands.{0}".format(cmd_name))
